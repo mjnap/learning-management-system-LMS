@@ -3,9 +3,9 @@ package ir.sobhan.lms.model.dto.inputdto;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
 @Setter
-public class InstructorInputDTO {
+@Getter
+public class CourseSectionRegistrationInputDTO {
     private String userName;
-    private String rank;
+    private Long courseSectionId;
 }

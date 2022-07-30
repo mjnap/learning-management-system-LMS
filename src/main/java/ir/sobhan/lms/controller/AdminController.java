@@ -1,14 +1,15 @@
 package ir.sobhan.lms.controller;
 
-import ir.sobhan.lms.business.assembler.AdminModelAssembler;
-import ir.sobhan.lms.business.assembler.InstructorModelAssembler;
-import ir.sobhan.lms.business.assembler.StudentModelAssembler;
-import ir.sobhan.lms.business.assembler.TermModelAssembler;
-import ir.sobhan.lms.dao.InstructorRepository;
-import ir.sobhan.lms.dao.StudentRepository;
-import ir.sobhan.lms.dao.TermRepository;
-import ir.sobhan.lms.dao.UserRepository;
-import ir.sobhan.lms.model.*;
+import ir.sobhan.lms.business.assembler.*;
+import ir.sobhan.lms.dao.*;
+import ir.sobhan.lms.model.dto.inputdto.CourseInputDTO;
+import ir.sobhan.lms.model.dto.inputdto.InstructorInputDTO;
+import ir.sobhan.lms.model.dto.inputdto.StudentInputDTO;
+import ir.sobhan.lms.model.dto.inputdto.TermInputDTO;
+import ir.sobhan.lms.model.dto.outputdto.InstructorOutputDTO;
+import ir.sobhan.lms.model.dto.outputdto.StudentOutputDTO;
+import ir.sobhan.lms.model.entity.*;
+import ir.sobhan.lms.security.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -30,15 +31,17 @@ public class AdminController {
     private final InstructorModelAssembler instructorAssembler;
     private final InstructorRepository instructorRepository;
 
-    @PostMapping("/newInstructor/{userName}")
-    public ResponseEntity<?> newInstructor(@PathVariable String userName){
+    @PostMapping("/newInstructor")
+    public ResponseEntity<?> newInstructor(@RequestBody InstructorInputDTO instructorInputDTO){
 
-        User user = userRepository.findByUserName(userName);
+        User user = userRepository.findByUserName(instructorInputDTO.getUserName());
         user.setActive(true);
+        user.setRole(Role.INSTRUCTOR);
 
-        Instructor instructor = new Instructor(user, Rank.ASSISTANT);//todo رنک آن کاربر و یوزرنیم او باید به صورت رکویست بادی گرفته شود
+        Instructor instructor = new Instructor(user,
+                Rank.valueOf(instructorInputDTO.getRank().toUpperCase()));
 
-        EntityModel<Instructor> instructorModel = instructorAssembler.toModel(instructorRepository.save(instructor));
+        EntityModel<InstructorOutputDTO> instructorModel = instructorAssembler.toModel(instructorRepository.save(instructor));
 
         return ResponseEntity
                 .created(instructorModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -61,15 +64,19 @@ public class AdminController {
     private final StudentModelAssembler studentAssembler;
     private final StudentRepository studentRepository;
 
-    @PostMapping("/newStudent/{userName}")
-    public ResponseEntity<?> newStudent(@PathVariable String userName){
+    @PostMapping("/newStudent")
+    public ResponseEntity<?> newStudent(@RequestBody StudentInputDTO studentInputDTO){
 
-        User user = userRepository.findByUserName(userName);
+        User user = userRepository.findByUserName(studentInputDTO.getUserName());
         user.setActive(true);
+        user.setRole(Role.STUDENT);
 
-        Student student = new Student(user,"40021160040", Degree.BS, new Date());
+        Student student = new Student(user,
+                studentInputDTO.getStudentId(),
+                Degree.valueOf(studentInputDTO.getDegree().toUpperCase()),
+                new Date());
 
-        EntityModel<Student> studentModel = studentAssembler.toModel(studentRepository.save(student));
+        EntityModel<StudentOutputDTO> studentModel = studentAssembler.toModel(studentRepository.save(student));
 
         return ResponseEntity
                 .created(studentModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
@@ -92,10 +99,10 @@ public class AdminController {
     private final TermModelAssembler termAssembler;
     private final TermRepository termRepository;
 
-    @PostMapping("/newTerm/{title}")
-    public ResponseEntity<?> newTerm(@PathVariable String title){
+    @PostMapping("/newTerm")
+    public ResponseEntity<?> newTerm(@RequestBody TermInputDTO termInputDTO){
 
-        Term newTerm = new Term(title, true);
+        Term newTerm = termInputDTO.toEntity();
 
         EntityModel<Term> termModel = termAssembler.toModel(termRepository.save(newTerm));
 
@@ -114,6 +121,30 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // Course
+    // Course -----------------------------------------
+    private final CourseModelAssembler courseAssembler;
+    private final CourseRepository courseRepository;
+
+    @PostMapping("/newCourse")
+    public ResponseEntity<?> newCourse(@RequestBody CourseInputDTO courseInputDTO){
+
+        Course newCourse = courseInputDTO.toEntity();
+
+        EntityModel<Course> courseModel = courseAssembler.toModel(courseRepository.save(newCourse));
+
+        return ResponseEntity
+                .created(courseModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .body(courseModel);
+    }
+
+    @PutMapping("/updateCourse")
+    public ResponseEntity<?> updateCourse(){return null;}//todo
+
+    @DeleteMapping("/deleteCourse/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteCurse(@PathVariable Long id){
+        courseRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
 

@@ -1,5 +1,8 @@
-package ir.sobhan.lms.model;
+package ir.sobhan.lms.model.entity;
 
+import ir.sobhan.lms.model.dto.MapperOutput;
+import ir.sobhan.lms.model.dto.outputdto.StudentOutputDTO;
+import ir.sobhan.lms.security.Role;
 import lombok.*;
 
 import javax.persistence.*;
@@ -13,7 +16,7 @@ import java.util.List;
 @Getter
 @EqualsAndHashCode
 @ToString
-public class Student{
+public class Student implements MapperOutput<StudentOutputDTO> {
 
     @Id
     @GeneratedValue
@@ -35,4 +38,14 @@ public class Student{
 
     @OneToMany(mappedBy = "student")
     private List<CourseSectionRegistration> courseSectionRegistrationList;
+
+    @Override
+    public StudentOutputDTO toDTO() {
+        return StudentOutputDTO.builder()
+                .userDTO(user.toDTO())
+                .studentId(studentId)
+                .degree(degree)
+                .startDate(startDate)
+                .build();
+    }
 }

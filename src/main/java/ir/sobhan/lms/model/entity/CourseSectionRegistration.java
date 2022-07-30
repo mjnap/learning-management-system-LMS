@@ -1,4 +1,4 @@
-package ir.sobhan.lms.model;
+package ir.sobhan.lms.model.entity;
 
 import lombok.*;
 
@@ -17,11 +17,13 @@ public class CourseSectionRegistration {
     @Id
     @GeneratedValue
     private Long id;
-    @NonNull
+
     private Double score;
+
     @ManyToOne
     @NonNull
     private CourseSection courseSection;
+
     @ManyToOne
     @NonNull
     private Student student;

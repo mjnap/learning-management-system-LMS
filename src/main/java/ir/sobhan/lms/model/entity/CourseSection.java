@@ -1,4 +1,4 @@
-package ir.sobhan.lms.model;
+package ir.sobhan.lms.model.entity;
 
 import lombok.*;
 
@@ -15,16 +15,19 @@ public class CourseSection {
     @Id
     @GeneratedValue
     private Long id;
+
     @ManyToOne
     @NonNull
     private Instructor instructor;
+
     @ManyToOne
     @NonNull
     private Course course;
+
     @ManyToOne
     @NonNull
     private Term term;
+
     @OneToMany(mappedBy = "courseSection")
-    @NonNull
     private List<CourseSectionRegistration> courseSectionRegistrationList;
 }

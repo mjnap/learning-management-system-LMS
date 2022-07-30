@@ -1,4 +1,4 @@
-package ir.sobhan.lms.model;
+package ir.sobhan.lms.model.entity;
 
 import lombok.*;
 
@@ -8,23 +8,21 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @RequiredArgsConstructor
-@Getter
 @Setter
-@EqualsAndHashCode
-@ToString
-public class Instructor{
+@Getter
+public class Term {
 
     @Id
     @GeneratedValue
     private Long id;
 
     @NonNull
-    @OneToOne
-    private User user;
+    @Column(nullable = false)
+    private String title;
 
     @NonNull
-    private Rank level;
+    private boolean open;
 
-    @OneToMany(mappedBy = "instructor")
+    @OneToMany(mappedBy = "term")
     private List<CourseSection> courseSectionList;
 }

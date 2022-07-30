@@ -5,7 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class InstructorInputDTO {
+public class StudentInputDTO {
     private String userName;
-    private String rank;
+    private String studentId;
+    private String degree;
 }

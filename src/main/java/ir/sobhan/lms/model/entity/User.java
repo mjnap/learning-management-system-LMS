@@ -1,7 +1,8 @@
-package ir.sobhan.lms.model;
+package ir.sobhan.lms.model.entity;
 
 import ir.sobhan.lms.model.dto.MapperOutput;
 import ir.sobhan.lms.model.dto.outputdto.UserOutputDTO;
+import ir.sobhan.lms.security.Role;
 import lombok.*;
 
 import javax.persistence.*;
@@ -45,12 +46,15 @@ public class User implements MapperOutput<UserOutputDTO> {
     @NonNull
     private boolean active;
 
+    @NonNull
+    private Role role;
+
     @Override
     public UserOutputDTO toDTO() {
         return UserOutputDTO.builder()
-                .userName(this.userName)
-                .name(this.name)
-                .phone(this.phone)
-                .nationalId(this.nationalId).build();
+                .userName(userName)
+                .name(name)
+                .phone(phone)
+                .nationalId(nationalId).build();
     }
 }

@@ -3,14 +3,19 @@ package ir.sobhan.lms.controller;
 import ir.sobhan.lms.business.assembler.UserModelAssembler;
 import ir.sobhan.lms.business.exceptions.UserNotFoundException;
 import ir.sobhan.lms.dao.UserRepository;
-import ir.sobhan.lms.model.User;
+import ir.sobhan.lms.model.entity.User;
+import ir.sobhan.lms.model.dto.inputdto.UserInputDTO;
+import ir.sobhan.lms.model.dto.outputdto.UserOutputDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +29,12 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserModelAssembler userAssembler;
+    private final PasswordEncoder passwordEncoder;
 
     @GetMapping()
-    public CollectionModel<EntityModel<User>> all(){
+    public CollectionModel<EntityModel<UserOutputDTO>> all(){
 
-        List<EntityModel<User>> userList = userRepository.findAll().stream()
+        List<EntityModel<UserOutputDTO>> userList = userRepository.findAll().stream()
                 .map(userAssembler::toModel)
                 .collect(Collectors.toList());
 
@@ -37,7 +43,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public EntityModel<User> one(@PathVariable Long id){
+    public EntityModel<UserOutputDTO> one(@PathVariable Long id){
 
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 
@@ -45,15 +51,16 @@ public class UserController {
     }
 
     @PostMapping()
-    public ResponseEntity<?> newUser(@RequestBody User user){
+    public ResponseEntity<?> newUser(@RequestBody UserInputDTO userInputDTO){
+
+        User user = userInputDTO.toEntity();
+        user.setPassword(passwordEncoder.encode(userInputDTO.getPassword()));
 
         User newUser = userRepository.save(user);
-        EntityModel<User> newUserModel = userAssembler.toModel(newUser);
-
-        log.info("Add new User " + newUser);
+        EntityModel<UserOutputDTO> newUserModel = userAssembler.toModel(newUser);
 
         return ResponseEntity
-                .created(newUserModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .status(HttpStatus.CREATED)
                 .body(newUserModel);
     }
 }

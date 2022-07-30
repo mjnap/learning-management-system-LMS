@@ -3,7 +3,7 @@ package ir.sobhan.lms.controller;
 import ir.sobhan.lms.business.assembler.TermModelAssembler;
 import ir.sobhan.lms.business.exceptions.TermNotFoundException;
 import ir.sobhan.lms.dao.TermRepository;
-import ir.sobhan.lms.model.Term;
+import ir.sobhan.lms.model.entity.Term;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;

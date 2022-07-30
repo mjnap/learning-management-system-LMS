@@ -1,6 +1,6 @@
 package ir.sobhan.lms.dao;
 
-import ir.sobhan.lms.model.Student;
+import ir.sobhan.lms.model.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

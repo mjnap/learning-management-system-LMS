@@ -2,7 +2,7 @@ package ir.sobhan.lms.business.assembler;
 
 import ir.sobhan.lms.controller.InstructorController;
 import ir.sobhan.lms.controller.UserController;
-import ir.sobhan.lms.model.User;
+import ir.sobhan.lms.model.entity.User;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;

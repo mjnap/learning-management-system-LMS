@@ -1,7 +1,7 @@
 package ir.sobhan.lms.business.assembler;
 
 import ir.sobhan.lms.controller.TermController;
-import ir.sobhan.lms.model.Term;
+import ir.sobhan.lms.model.entity.Term;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
