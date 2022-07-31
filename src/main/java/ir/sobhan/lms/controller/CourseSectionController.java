@@ -3,14 +3,13 @@ package ir.sobhan.lms.controller;
 import ir.sobhan.lms.business.assembler.CourseSectionModelAssembler;
 import ir.sobhan.lms.business.exceptions.CourseSectionNotFoundException;
 import ir.sobhan.lms.dao.CourseSectionRepository;
+import ir.sobhan.lms.model.dto.outputdto.CourseSectionOutputDTO;
 import ir.sobhan.lms.model.entity.CourseSection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.util.List;
@@ -32,14 +31,20 @@ public class CourseSectionController {
                 .collect(Collectors.toList());
 
         return CollectionModel.of(modelList,
-                linkTo(methodOn(CourseSectionController.class).all(termId)).withSelfRel());
+                linkTo(methodOn(CourseSectionController.class).all(termId)).withSelfRel());//todo Appropriate response
     }
 
-    @GetMapping("/{id}")
-    public EntityModel<CourseSection> one(@PathVariable Long id){
+    @GetMapping()
+    public CourseSectionOutputDTO one(@RequestParam Long id){
 
         CourseSection courseSection = courseSectionRepository.findById(id).orElseThrow(() -> new CourseSectionNotFoundException(id));
-
-        return courseSectionAssembler.toModel(courseSection);
+        
+        return CourseSectionOutputDTO.builder()
+                .id(courseSection.getId())
+                .instructorName(courseSection.getInstructor().getUser().getName())
+                .courseTitle(courseSection.getCourse().getTitle())
+                .termId(courseSection.getTerm().getId())
+                .studentCount(courseSection.getCourseSectionRegistrationList().size())
+                .build();
     }
 }

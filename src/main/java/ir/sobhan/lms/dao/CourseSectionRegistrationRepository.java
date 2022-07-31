@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface CourseSectionRegistrationRepository extends JpaRepository<CourseSectionRegistration, Long> {
     CourseSectionRegistration findByCourseSection_IdAndStudent_Id(Long courseSectionId, Long studentId);
     List<CourseSectionRegistration> findAllByCourseSection_Term_IdAndStudent_User_UserName(Long termId, String userName);
+    List<CourseSectionRegistration> findAllByStudent_User_UserName(String UserName);
 }

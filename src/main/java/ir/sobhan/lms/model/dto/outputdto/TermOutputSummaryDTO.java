@@ -7,10 +7,8 @@ import lombok.Setter;
 @Builder
 @Setter
 @Getter
-public class CourseSectionOutputDTO {
-    private Long id;
-    private String instructorName;
-    private String courseTitle;
+public class TermOutputSummaryDTO {
     private Long termId;
-    private int studentCount;
+    private String termTile;
+    private Double termAverage;
 }

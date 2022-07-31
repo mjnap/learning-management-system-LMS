@@ -13,6 +13,6 @@ public class CourseSectionModelAssembler implements RepresentationModelAssembler
     public EntityModel<CourseSection> toModel(CourseSection entity) {
         return EntityModel.of(entity,
                 linkTo(methodOn(CourseSectionController.class).one(entity.getId())).withSelfRel(),
-                linkTo(methodOn(CourseSectionController.class).all(entity.getTerm().getId())).withRel("courseSections"));
+                linkTo(methodOn(CourseSectionController.class).all(entity.getId())).withRel("courseSections"));
     }
 }

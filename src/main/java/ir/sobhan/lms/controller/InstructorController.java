@@ -2,6 +2,7 @@ package ir.sobhan.lms.controller;
 
 import ir.sobhan.lms.business.assembler.CourseSectionModelAssembler;
 import ir.sobhan.lms.business.assembler.InstructorModelAssembler;
+import ir.sobhan.lms.business.exceptions.CourseNotFoundException;
 import ir.sobhan.lms.business.exceptions.CourseSectionNotFoundException;
 import ir.sobhan.lms.business.exceptions.InstructorNotFoundException;
 import ir.sobhan.lms.business.exceptions.TermNotFoundException;
@@ -17,6 +18,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -60,9 +62,10 @@ public class InstructorController {
     }
 
     @PostMapping("/newCourseSection")
-    public ResponseEntity<?> newCourseSection(@RequestBody CourseSectionInputDTO courseSectionInputDTO){
+    public ResponseEntity<?> newCourseSection(@RequestBody CourseSectionInputDTO courseSectionInputDTO,
+                                              Authentication authentication){
 
-        Instructor instructor = instructorRepository.findByUser_UserName(courseSectionInputDTO.getInstructorUserName());//todo must be Optional
+        Instructor instructor = instructorRepository.findByUser_UserName(authentication.getName());//todo must be Optional
 
         Course course = courseRepository.findByTitle(courseSectionInputDTO.getCourseTitle());//todo must be Optional
 
@@ -79,11 +82,31 @@ public class InstructorController {
                 .body(entityModel);
     }
 
-    @GetMapping("/getStudentsOfCourseSection/{id}")
-    public List<StudentCourseSectionDTO> getStudentsOfCourseSection(@PathVariable Long id){
+    @PutMapping("/updateCourseSection")
+    public ResponseEntity<?> updateCourseSection(){
+        return null;
+    }//todo
 
-        CourseSection courseSection = courseSectionRepository.findById(id)
-                .orElseThrow(() -> new CourseSectionNotFoundException(id));
+    @DeleteMapping("/deleteCourseSection/{courseSectionId}")
+    public ResponseEntity<?> deleteCourseSection(@PathVariable Long courseSectionId){
+
+        CourseSection courseSection = courseSectionRepository.findById(courseSectionId)
+                .orElseThrow(() -> new CourseNotFoundException(courseSectionId));
+
+        if(courseSection.getCourseSectionRegistrationList().isEmpty())
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("There are no students");
+
+        courseSectionRepository.delete(courseSection);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/getStudentsOfCourseSection/{courseSectionId}")
+    public List<StudentCourseSectionDTO> getStudentsOfCourseSection(@PathVariable Long courseSectionId){
+
+        CourseSection courseSection = courseSectionRepository.findById(courseSectionId)
+                .orElseThrow(() -> new CourseSectionNotFoundException(courseSectionId));
 
         List<StudentCourseSectionDTO> studentList = new ArrayList<>();
 
@@ -106,8 +129,6 @@ public class InstructorController {
             courseSectionRegistrationRepository.save(updateCourseSectionRegistration);
         });
 
-        return ResponseEntity
-                .ok()
-                .build();
+        return ResponseEntity.ok("Scores were recorded");
     }
 }

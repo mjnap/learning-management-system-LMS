@@ -1,6 +1,10 @@
 package ir.sobhan.lms.controller;
 
 import ir.sobhan.lms.business.assembler.*;
+import ir.sobhan.lms.business.exceptions.CourseNotFoundException;
+import ir.sobhan.lms.business.exceptions.InstructorNotFoundException;
+import ir.sobhan.lms.business.exceptions.StudentNotFoundException;
+import ir.sobhan.lms.business.exceptions.TermNotFoundException;
 import ir.sobhan.lms.dao.*;
 import ir.sobhan.lms.model.dto.inputdto.CourseInputDTO;
 import ir.sobhan.lms.model.dto.inputdto.InstructorInputDTO;
@@ -18,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin")
@@ -36,7 +42,9 @@ public class AdminController {
 
         User user = userRepository.findByUserName(instructorInputDTO.getUserName());
         user.setActive(true);
-        user.setRole(Role.INSTRUCTOR);
+        String roles = user.getRoles();
+        roles += " "+Role.INSTRUCTOR.name();
+        user.setRoles(roles);
 
         Instructor instructor = new Instructor(user,
                 Rank.valueOf(instructorInputDTO.getRank().toUpperCase()));
@@ -48,10 +56,21 @@ public class AdminController {
                 .body(instructorModel);
     }
 
-    @PutMapping("/updateInstructor")
-    public ResponseEntity<?> updateInstructor(){//todo
-        return null;
-    }//todo
+    @PutMapping("/updateInstructor/{instructorId}")
+    public ResponseEntity<?> updateInstructor(@PathVariable Long instructorId,
+                                              @RequestBody InstructorInputDTO instructorInputDTO){//todo Appropriate input
+
+        Instructor updateInstructor = instructorRepository.findById(instructorId)
+                .map(instructor -> {
+                    instructor.setLevel(Rank.valueOf(instructorInputDTO.getRank().toUpperCase()));
+                    return instructorRepository.save(instructor);
+                })
+                .orElseThrow(() -> new InstructorNotFoundException(instructorId));
+
+        return ResponseEntity
+                .ok()
+                .body(instructorAssembler.toModel(updateInstructor));
+    }
 
     @DeleteMapping("/deleteInstructor/{userName}")
     @Transactional
@@ -69,7 +88,9 @@ public class AdminController {
 
         User user = userRepository.findByUserName(studentInputDTO.getUserName());
         user.setActive(true);
-        user.setRole(Role.STUDENT);
+        String roles = user.getRoles();
+        roles += " "+Role.STUDENT.name();
+        user.setRoles(roles);
 
         Student student = new Student(user,
                 studentInputDTO.getStudentId(),
@@ -83,10 +104,21 @@ public class AdminController {
                 .body(studentModel);
     }
 
-    @PutMapping("/updateStudent")
-    public ResponseEntity<?> updateStudent(){//todo
-        return null;
-    }//todo
+    @PutMapping("/updateStudent/{studentId}")
+    public ResponseEntity<?> updateStudent(@PathVariable Long studentId,
+                                           @RequestBody StudentInputDTO studentInputDTO){//todo Appropriate input
+
+        Student updateStudent = studentRepository.findById(studentId)
+                .map(student -> {
+                    student.setDegree(Degree.valueOf(studentInputDTO.getDegree()));
+                    return studentRepository.save(student);
+                })
+                .orElseThrow(() -> new StudentNotFoundException(studentId.toString()));//todo have to be user name
+
+        return ResponseEntity
+                .ok()
+                .body(studentAssembler.toModel(updateStudent));
+    }
 
     @DeleteMapping("/deleteStudent/{userName}")
     @Transactional
@@ -111,8 +143,22 @@ public class AdminController {
                 .body(termModel);
     }
 
-    @PutMapping("/updateTerm")
-    public ResponseEntity<?> updateTerm(){return null;}//todo
+    @PutMapping("/updateTerm/{termId}")
+    public ResponseEntity<?> updateTerm(@PathVariable Long termId,
+                                        @RequestBody TermInputDTO termInputDTO){
+
+        Term updateTerm = termRepository.findById(termId)
+                .map(term -> {
+                    term.setTitle(termInputDTO.getTitle());
+                    term.setOpen(termInputDTO.isOpen());
+                    return termRepository.save(term);
+                })
+                .orElseThrow(() -> new TermNotFoundException(termId));
+
+        return ResponseEntity
+                .ok()
+                .body(updateTerm);
+    }
 
     @DeleteMapping("/deleteTerm/{id}")
     @Transactional
@@ -137,8 +183,22 @@ public class AdminController {
                 .body(courseModel);
     }
 
-    @PutMapping("/updateCourse")
-    public ResponseEntity<?> updateCourse(){return null;}//todo
+    @PutMapping("/updateCourse/{courseId}")
+    public ResponseEntity<?> updateCourse(@PathVariable Long courseId,
+                                          @RequestBody CourseInputDTO courseInputDTO){
+
+        Course updateCourse = courseRepository.findById(courseId)
+                .map(course -> {
+                    course.setTitle(courseInputDTO.getTitle());
+                    course.setUnits(courseInputDTO.getUnits());
+                    return courseRepository.save(course);
+                })
+                .orElseThrow(() -> new CourseNotFoundException(courseId));
+
+        return ResponseEntity
+                .ok()
+                .body(updateCourse);
+    }
 
     @DeleteMapping("/deleteCourse/{id}")
     @Transactional

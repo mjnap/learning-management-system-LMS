@@ -18,7 +18,7 @@ public class CourseSectionRegistration {
     @GeneratedValue
     private Long id;
 
-    private Double score;
+    private Double score = 0D;
 
     @ManyToOne
     @NonNull

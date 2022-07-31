@@ -2,7 +2,6 @@ package ir.sobhan.lms.model.dto.inputdto;
 
 import ir.sobhan.lms.model.entity.User;
 import ir.sobhan.lms.model.dto.MapperInput;
-import ir.sobhan.lms.security.Role;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +18,6 @@ public class UserInputDTO implements MapperInput<User> {
 
     @Override
     public User toEntity() {
-        return new User(userName,password,name,phone,nationalId,false,false, Role.USER);
+        return new User(userName,password,name,phone,nationalId,false,false);
     }
 }

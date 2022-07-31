@@ -6,6 +6,7 @@ import ir.sobhan.lms.dao.UserRepository;
 import ir.sobhan.lms.model.entity.User;
 import ir.sobhan.lms.model.dto.inputdto.UserInputDTO;
 import ir.sobhan.lms.model.dto.outputdto.UserOutputDTO;
+import ir.sobhan.lms.security.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
@@ -55,6 +56,7 @@ public class UserController {
 
         User user = userInputDTO.toEntity();
         user.setPassword(passwordEncoder.encode(userInputDTO.getPassword()));
+        user.setRoles(Role.USER.name());
 
         User newUser = userRepository.save(user);
         EntityModel<UserOutputDTO> newUserModel = userAssembler.toModel(newUser);

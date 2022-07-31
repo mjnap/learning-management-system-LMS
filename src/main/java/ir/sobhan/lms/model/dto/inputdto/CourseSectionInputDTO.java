@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CourseSectionInputDTO {
-    private String instructorUserName;
     private String courseTitle;
     private Long termId;
 }
