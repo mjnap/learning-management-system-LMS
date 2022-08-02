@@ -19,19 +19,21 @@ public class UserService {
     private final AdminConfig adminConfig;
     private final PasswordEncoder passwordEncoder;
 
-//    @Bean
-//    CommandLineRunner addAdmin(UserRepository userRepository){
-//        User user = new User(
-//                adminConfig.getUserName(),
-//                passwordEncoder.encode(adminConfig.getPassword()),
-//                "Mohammadjavad",
-//                "09217679934",
-//                "12456123156",
-//                true,
-//                true);
-//        user.setRoles(Role.ADMIN.name());
-//        return args -> {
-//            log.info("Define an admin " + userRepository.save(user));
-//        };
-//    }
+    @Bean
+    CommandLineRunner addAdmin(UserRepository userRepository){
+        User user = new User(
+                adminConfig.getUserName(),
+                passwordEncoder.encode(adminConfig.getPassword()),
+                "Mohammadjavad",
+                "09217679934",
+                "12456123156",
+                true,
+                true);
+        user.setRoles(Role.ADMIN.name());
+
+        if(!userRepository.existsByUserName(user.getUserName()))
+            return args -> log.debug("Define an admin " + userRepository.save(user));
+
+        return args -> log.debug("Admin active");
+    }
 }

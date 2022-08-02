@@ -2,11 +2,10 @@ package ir.sobhan.lms.dao;
 
 import ir.sobhan.lms.model.entity.CourseSectionRegistration;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import sun.rmi.server.LoaderHandler;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface CourseSectionRegistrationRepository extends JpaRepository<CourseSectionRegistration, Long> {

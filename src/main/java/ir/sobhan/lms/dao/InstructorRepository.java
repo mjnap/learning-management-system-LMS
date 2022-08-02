@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface InstructorRepository extends JpaRepository<Instructor, Long> {
-    Instructor findByUser_UserName(String userName);
+    Optional<Instructor> findByUser_UserName(String userName);
     void deleteByUser_UserName(String userName);
 }

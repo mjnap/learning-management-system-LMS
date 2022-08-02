@@ -1,7 +1,7 @@
 package ir.sobhan.lms.business.exceptions;
 
 public class CourseNotFoundException extends RuntimeException{
-    public CourseNotFoundException(Long id) {
+    public CourseNotFoundException(Object id) {
         super("Could not find course " + id);
     }
 }

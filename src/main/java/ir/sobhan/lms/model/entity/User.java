@@ -1,17 +1,13 @@
 package ir.sobhan.lms.model.entity;
 
-import antlr.collections.List;
 import ir.sobhan.lms.model.dto.MapperOutput;
 import ir.sobhan.lms.model.dto.outputdto.UserOutputDTO;
-import ir.sobhan.lms.security.Role;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
 
 @Entity
+@Table(name = "User_Table")
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode
@@ -58,6 +54,7 @@ public class User implements MapperOutput<UserOutputDTO> {
                 .userName(userName)
                 .name(name)
                 .phone(phone)
-                .nationalId(nationalId).build();
+                .nationalId(nationalId)
+                .build();
     }
 }

@@ -34,7 +34,7 @@ public class Instructor implements MapperOutput<InstructorOutputDTO> {
     @Override
     public InstructorOutputDTO toDTO() {
         return InstructorOutputDTO.builder()
-                .userDTO(user.toDTO())
+                .userInfo(user.toDTO())
                 .rank(level)
                 .build();
     }

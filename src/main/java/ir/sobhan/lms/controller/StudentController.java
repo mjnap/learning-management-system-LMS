@@ -62,7 +62,7 @@ public class StudentController {
     }
 
     @PostMapping("/registerCourse/{courseSectionId}")
-    public ResponseEntity<?> registerCourse(@PathVariable Long courseSectionId  ,Authentication authentication){
+    public ResponseEntity<?> registerCourse(@PathVariable Long courseSectionId, Authentication authentication){
 
         CourseSectionRegistration courseSectionRegistration = new CourseSectionRegistration(
                 courseSectionRepository.findById(courseSectionId)
@@ -78,13 +78,12 @@ public class StudentController {
     }
 
     @GetMapping("/semesterGrades/{termId}")
-    public SemesterGradesOutputDTO semesterGrades(@PathVariable Long termId , Authentication authentication){
+    public ResponseEntity<?> semesterGrades(@PathVariable Long termId , Authentication authentication){
 
         List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
                 .findAllByCourseSection_Term_IdAndStudent_User_UserName(termId, authentication.getName());
 
         Double avg = studentService.average(courseList);
-
 
         List<ListSemesterOutputDTO> sectionOutputDTOList = new ArrayList<>();
         courseList.forEach(course -> {
@@ -97,14 +96,14 @@ public class StudentController {
                     .build());
         });
 
-        return SemesterGradesOutputDTO.builder()
+        return ResponseEntity.ok(SemesterGradesOutputDTO.builder()
                 .average(avg)
                 .courseSectionList(sectionOutputDTOList)
-                .build();
+                .build());
     }
 
     @GetMapping("/summary")
-    public SummaryOutputDTO summary(Authentication authentication){
+    public ResponseEntity<?> summary(Authentication authentication){
 
         List<Term> termList = termRepository.findAll();
 
@@ -123,10 +122,10 @@ public class StudentController {
             });
         });
 
-        return SummaryOutputDTO.builder()
+        return ResponseEntity.ok(SummaryOutputDTO.builder()
                 .totalAverage(studentService.average(
                         courseSectionRegistrationRepository.findAllByStudent_User_UserName(authentication.getName())))
                 .termList(termOutputSummaryDTOList)
-                .build();
+                .build());
     }
 }

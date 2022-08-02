@@ -1,15 +1,9 @@
 package ir.sobhan.lms.controller;
 
 import ir.sobhan.lms.business.assembler.*;
-import ir.sobhan.lms.business.exceptions.CourseNotFoundException;
-import ir.sobhan.lms.business.exceptions.InstructorNotFoundException;
-import ir.sobhan.lms.business.exceptions.StudentNotFoundException;
-import ir.sobhan.lms.business.exceptions.TermNotFoundException;
+import ir.sobhan.lms.business.exceptions.*;
 import ir.sobhan.lms.dao.*;
-import ir.sobhan.lms.model.dto.inputdto.CourseInputDTO;
-import ir.sobhan.lms.model.dto.inputdto.InstructorInputDTO;
-import ir.sobhan.lms.model.dto.inputdto.StudentInputDTO;
-import ir.sobhan.lms.model.dto.inputdto.TermInputDTO;
+import ir.sobhan.lms.model.dto.inputdto.*;
 import ir.sobhan.lms.model.dto.outputdto.InstructorOutputDTO;
 import ir.sobhan.lms.model.dto.outputdto.StudentOutputDTO;
 import ir.sobhan.lms.model.entity.*;
@@ -17,6 +11,7 @@ import ir.sobhan.lms.security.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +25,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final AdminModelAssembler adminAssembler;
     private final UserRepository userRepository;
 
     // Instructor ---------------------------------------------
@@ -40,7 +34,8 @@ public class AdminController {
     @PostMapping("/newInstructor")
     public ResponseEntity<?> newInstructor(@RequestBody InstructorInputDTO instructorInputDTO){
 
-        User user = userRepository.findByUserName(instructorInputDTO.getUserName());
+        User user = userRepository.findByUserName(instructorInputDTO.getUserName())
+                .orElseThrow(() -> new UserNotFoundException(instructorInputDTO.getUserName()));
         user.setActive(true);
         String roles = user.getRoles();
         roles += " "+Role.INSTRUCTOR.name();
@@ -52,24 +47,25 @@ public class AdminController {
         EntityModel<InstructorOutputDTO> instructorModel = instructorAssembler.toModel(instructorRepository.save(instructor));
 
         return ResponseEntity
-                .created(instructorModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .status(HttpStatus.CREATED)
                 .body(instructorModel);
     }
 
     @PutMapping("/updateInstructor/{instructorId}")
     public ResponseEntity<?> updateInstructor(@PathVariable Long instructorId,
-                                              @RequestBody InstructorInputDTO instructorInputDTO){//todo Appropriate input
+                                              @RequestBody InstructorUpdateInputDTO instructorUpdateInputDTO){
 
         Instructor updateInstructor = instructorRepository.findById(instructorId)
                 .map(instructor -> {
-                    instructor.setLevel(Rank.valueOf(instructorInputDTO.getRank().toUpperCase()));
+                    User user = instructor.getUser();
+                    user.setName(instructorUpdateInputDTO.getName());
+                    instructor.setUser(user);
+                    instructor.setLevel(Rank.valueOf(instructorUpdateInputDTO.getRank().toUpperCase()));
                     return instructorRepository.save(instructor);
                 })
                 .orElseThrow(() -> new InstructorNotFoundException(instructorId));
 
-        return ResponseEntity
-                .ok()
-                .body(instructorAssembler.toModel(updateInstructor));
+        return ResponseEntity.ok(instructorAssembler.toModel(updateInstructor));
     }
 
     @DeleteMapping("/deleteInstructor/{userName}")
@@ -86,7 +82,8 @@ public class AdminController {
     @PostMapping("/newStudent")
     public ResponseEntity<?> newStudent(@RequestBody StudentInputDTO studentInputDTO){
 
-        User user = userRepository.findByUserName(studentInputDTO.getUserName());
+        User user = userRepository.findByUserName(studentInputDTO.getUserName())
+                .orElseThrow(() -> new UserNotFoundException(studentInputDTO.getUserName()));
         user.setActive(true);
         String roles = user.getRoles();
         roles += " "+Role.STUDENT.name();
@@ -100,24 +97,26 @@ public class AdminController {
         EntityModel<StudentOutputDTO> studentModel = studentAssembler.toModel(studentRepository.save(student));
 
         return ResponseEntity
-                .created(studentModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .status(HttpStatus.CREATED)
                 .body(studentModel);
     }
 
     @PutMapping("/updateStudent/{studentId}")
     public ResponseEntity<?> updateStudent(@PathVariable Long studentId,
-                                           @RequestBody StudentInputDTO studentInputDTO){//todo Appropriate input
+                                           @RequestBody StudentUpdateInputDTO studentUpdateInputDTO){
 
         Student updateStudent = studentRepository.findById(studentId)
                 .map(student -> {
-                    student.setDegree(Degree.valueOf(studentInputDTO.getDegree()));
+                    User user = student.getUser();
+                    user.setName(studentUpdateInputDTO.getName());
+                    student.setUser(user);
+                    student.setDegree(Degree.valueOf(studentUpdateInputDTO.getDegree()));
                     return studentRepository.save(student);
                 })
-                .orElseThrow(() -> new StudentNotFoundException(studentId.toString()));//todo have to be user name
+                .orElseThrow(() -> new StudentNotFoundException(studentId));
 
         return ResponseEntity
-                .ok()
-                .body(studentAssembler.toModel(updateStudent));
+                .ok(studentAssembler.toModel(updateStudent));
     }
 
     @DeleteMapping("/deleteStudent/{userName}")
@@ -139,7 +138,7 @@ public class AdminController {
         EntityModel<Term> termModel = termAssembler.toModel(termRepository.save(newTerm));
 
         return ResponseEntity
-                .created(termModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .status(HttpStatus.CREATED)
                 .body(termModel);
     }
 
@@ -155,9 +154,7 @@ public class AdminController {
                 })
                 .orElseThrow(() -> new TermNotFoundException(termId));
 
-        return ResponseEntity
-                .ok()
-                .body(updateTerm);
+        return ResponseEntity.ok(updateTerm);
     }
 
     @DeleteMapping("/deleteTerm/{id}")
@@ -179,7 +176,7 @@ public class AdminController {
         EntityModel<Course> courseModel = courseAssembler.toModel(courseRepository.save(newCourse));
 
         return ResponseEntity
-                .created(courseModel.getRequiredLink(IanaLinkRelations.SELF).toUri())
+                .status(HttpStatus.CREATED)
                 .body(courseModel);
     }
 
@@ -195,9 +192,7 @@ public class AdminController {
                 })
                 .orElseThrow(() -> new CourseNotFoundException(courseId));
 
-        return ResponseEntity
-                .ok()
-                .body(updateCourse);
+        return ResponseEntity.ok(updateCourse);
     }
 
     @DeleteMapping("/deleteCourse/{id}")

@@ -9,6 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class InstructorOutputDTO {
-    private UserOutputDTO userDTO;
+    private UserOutputDTO userInfo;
     private Rank rank;
 }

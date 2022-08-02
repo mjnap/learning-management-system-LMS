@@ -2,7 +2,6 @@ package ir.sobhan.lms.model.entity;
 
 import ir.sobhan.lms.model.dto.MapperOutput;
 import ir.sobhan.lms.model.dto.outputdto.StudentOutputDTO;
-import ir.sobhan.lms.security.Role;
 import lombok.*;
 
 import javax.persistence.*;
@@ -42,7 +41,7 @@ public class Student implements MapperOutput<StudentOutputDTO> {
     @Override
     public StudentOutputDTO toDTO() {
         return StudentOutputDTO.builder()
-                .userDTO(user.toDTO())
+                .userInfo(user.toDTO())
                 .studentId(studentId)
                 .degree(degree)
                 .startDate(startDate)

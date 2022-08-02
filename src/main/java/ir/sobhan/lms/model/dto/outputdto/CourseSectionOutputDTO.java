@@ -12,5 +12,5 @@ public class CourseSectionOutputDTO {
     private String instructorName;
     private String courseTitle;
     private Long termId;
-    private int studentCount;
+    private Integer studentCount;
 }

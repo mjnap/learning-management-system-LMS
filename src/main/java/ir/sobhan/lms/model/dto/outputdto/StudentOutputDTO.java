@@ -11,7 +11,7 @@ import java.util.Date;
 @Getter
 @Setter
 public class StudentOutputDTO {
-    private UserOutputDTO userDTO;
+    private UserOutputDTO userInfo;
     private String studentId;
     private Degree degree;
     private Date startDate;
