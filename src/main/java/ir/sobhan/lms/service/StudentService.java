@@ -13,7 +13,10 @@ public class StudentService {
         String avg = String.format("%.2f", courseList.stream()
                 .map(CourseSectionRegistration::getScore)
                 .reduce(Double::sum)
-                .get() / courseList.size());
+                .orElseGet(() -> Double.NaN) / courseList.size());
+
+        if(avg.equals("NaN"))
+            return 0D;
 
         return Double.valueOf(avg);
     }

@@ -1,6 +1,5 @@
 package ir.sobhan.lms.controller;
 
-import ir.sobhan.lms.business.assembler.CourseSectionModelAssembler;
 import ir.sobhan.lms.business.assembler.InstructorModelAssembler;
 import ir.sobhan.lms.business.exceptions.*;
 import ir.sobhan.lms.dao.*;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -37,7 +35,6 @@ public class InstructorController {
     private final InstructorModelAssembler instructorAssembler;
     private final CourseRepository courseRepository;
     private final TermRepository termRepository;
-    private final CourseSectionModelAssembler courseSectionAssembler;
     private final CourseSectionRepository courseSectionRepository;
     private final CourseSectionRegistrationRepository courseSectionRegistrationRepository;
     private final UserRepository userRepository;
@@ -61,7 +58,7 @@ public class InstructorController {
         return instructorAssembler.toModel(instructor);
     }
 
-    @PostMapping("/newCourseSection")
+    @PostMapping("/new-course-section")
     public ResponseEntity<?> newCourseSection(@RequestBody CourseSectionInputDTO courseSectionInputDTO,
                                               Authentication authentication){
 
@@ -76,15 +73,14 @@ public class InstructorController {
 
         CourseSection newCourseSection = new CourseSection(instructor,course,term);
 
-        EntityModel<CourseSectionOutputDTO> entityModel = courseSectionAssembler.toModel(
-                courseSectionRepository.save(newCourseSection));
+        CourseSectionOutputDTO outputDTO = courseSectionRepository.save(newCourseSection).toDTO();
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(entityModel);
+                .body(outputDTO);
     }
 
-    @PutMapping("/updateCourseSection/{id}")
+    @PutMapping("/update-course-section/{id}")
     public ResponseEntity<?> updateCourseSection(@PathVariable Long id,
                                                  @RequestBody CourseSectionInputDTO courseSectionInputDTO,
                                                  Authentication authentication){
@@ -103,7 +99,8 @@ public class InstructorController {
             courseSection.setTerm(termRepository.findById(courseSectionInputDTO.getTermId())
                     .orElseThrow(() -> new TermNotFoundException(courseSectionInputDTO.getTermId())));
 
-            return ResponseEntity.ok(courseSectionAssembler.toModel(courseSection));
+            return ResponseEntity
+                    .ok(courseSection.toDTO());
         }
 
         return ResponseEntity
@@ -111,11 +108,17 @@ public class InstructorController {
                 .body("You are not the instructor of this group");
     }
 
-    @DeleteMapping("/deleteCourseSection/{courseSectionId}")
-    public ResponseEntity<?> deleteCourseSection(@PathVariable Long courseSectionId){
+    @DeleteMapping("/delete-course-section/{courseSectionId}")
+    public ResponseEntity<?> deleteCourseSection(@PathVariable Long courseSectionId,
+                                                 Authentication authentication){
 
         CourseSection courseSection = courseSectionRepository.findById(courseSectionId)
                 .orElseThrow(() -> new CourseNotFoundException(courseSectionId));
+
+        if(!courseSection.getInstructor().getUser().getUserName().equals(authentication.getName()))
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("You are not the instructor of this course section");
 
         if(courseSection.getCourseSectionRegistrationList().isEmpty())
             return ResponseEntity
@@ -123,25 +126,44 @@ public class InstructorController {
                     .body("There are no students");
 
         courseSectionRepository.delete(courseSection);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
-    @GetMapping("/getStudentsOfCourseSection/{courseSectionId}")
-    public List<StudentCourseSectionDTO> getStudentsOfCourseSection(@PathVariable Long courseSectionId){
+    @GetMapping("/get-students-of-course-section/{courseSectionId}")
+    public ResponseEntity<?> getStudentsOfCourseSection(@PathVariable Long courseSectionId,
+                                                        Authentication authentication){
 
         CourseSection courseSection = courseSectionRepository.findById(courseSectionId)
-                .orElseThrow(() -> new CourseSectionNotFoundException(courseSectionId));
+                .orElseThrow(() -> new CourseNotFoundException(courseSectionId));
+
+        if(!courseSection.getInstructor().getUser().getUserName().equals(authentication.getName()))
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("You are not the instructor of this course section");
+
 
         List<StudentCourseSectionDTO> studentList = new ArrayList<>();
 
         courseSection.getCourseSectionRegistrationList()
                 .forEach(courseSectionRegistration -> studentList.add(StudentCourseSectionDTO.toDTO(courseSectionRegistration)));
 
-        return studentList;
+        return ResponseEntity
+                .ok(studentList);
     }
 
     @PutMapping("/grading")
-    public ResponseEntity<?> grading(@RequestBody GradingInputDTO gradingInputDTO){
+    public ResponseEntity<?> grading(@RequestBody GradingInputDTO gradingInputDTO,
+                                     Authentication authentication){
+
+        CourseSection courseSection = courseSectionRepository.findById(gradingInputDTO.getCourseSectionId())
+                .orElseThrow(() -> new CourseNotFoundException(gradingInputDTO.getCourseSectionId()));
+
+        if(!courseSection.getInstructor().getUser().getUserName().equals(authentication.getName()))
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("You are not the instructor of this course section");
 
         gradingInputDTO.getStudentsScore().forEach(studentInfoDTO -> {
 
@@ -153,6 +175,7 @@ public class InstructorController {
             courseSectionRegistrationRepository.save(updateCourseSectionRegistration);
         });
 
-        return ResponseEntity.ok("Scores were recorded");
+        return ResponseEntity
+                .ok("Scores were recorded");
     }
 }

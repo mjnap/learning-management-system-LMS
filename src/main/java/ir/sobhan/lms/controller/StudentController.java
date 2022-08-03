@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,8 +62,9 @@ public class StudentController {
         return studentAssembler.toModel(student);
     }
 
-    @PostMapping("/registerCourse/{courseSectionId}")
-    public ResponseEntity<?> registerCourse(@PathVariable Long courseSectionId, Authentication authentication){
+    @PostMapping("/register-course")
+    public ResponseEntity<?> registerCourse(@RequestParam Long courseSectionId,
+                                            Authentication authentication){
 
         CourseSectionRegistration courseSectionRegistration = new CourseSectionRegistration(
                 courseSectionRepository.findById(courseSectionId)
@@ -74,14 +76,18 @@ public class StudentController {
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(courseSectionRegistration);
+                .body("Registration is done");
     }
 
-    @GetMapping("/semesterGrades/{termId}")
-    public ResponseEntity<?> semesterGrades(@PathVariable Long termId , Authentication authentication){
+    @GetMapping("/semester-grades/{termId}")
+    public ResponseEntity<?> semesterGrades(@PathVariable Long termId,
+                                            Authentication authentication){
 
         List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
                 .findAllByCourseSection_Term_IdAndStudent_User_UserName(termId, authentication.getName());
+
+        if(courseList == null)
+            return ResponseEntity.ok(Collections.EMPTY_LIST);
 
         Double avg = studentService.average(courseList);
 
@@ -113,18 +119,17 @@ public class StudentController {
             List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
                     .findAllByCourseSection_Term_IdAndStudent_User_UserName(term.getId(),authentication.getName());
 
-            courseList.forEach(course -> {
-                termOutputSummaryDTOList.add(TermOutputSummaryDTO.builder()
-                        .termId(term.getId())
-                        .termTile(term.getTitle())
-                        .termAverage(studentService.average(courseList))
-                        .build());
-            });
+            termOutputSummaryDTOList.add(TermOutputSummaryDTO.builder()
+                    .termId(term.getId())
+                    .termTile(term.getTitle())
+                    .termAverage(studentService.average(courseList))
+                    .build());
         });
 
         return ResponseEntity.ok(SummaryOutputDTO.builder()
-                .totalAverage(studentService.average(
-                        courseSectionRegistrationRepository.findAllByStudent_User_UserName(authentication.getName())))
+                .totalAverage(courseSectionRegistrationRepository.totalAverage(
+                        studentRepository.findByUser_UserName(authentication.getName()).orElseThrow(() -> new StudentNotFoundException(authentication.getName()))
+                        .getId()))
                 .termList(termOutputSummaryDTOList)
                 .build());
     }

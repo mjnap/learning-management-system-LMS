@@ -1,6 +1,7 @@
 package ir.sobhan.lms.business.assembler;
 
 import ir.sobhan.lms.controller.TermController;
+import ir.sobhan.lms.model.dto.outputdto.TermOutputDTO;
 import ir.sobhan.lms.model.entity.Term;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -9,10 +10,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 
 @Component
-public class TermModelAssembler implements RepresentationModelAssembler<Term, EntityModel<Term>> {
+public class TermModelAssembler implements RepresentationModelAssembler<Term, EntityModel<TermOutputDTO>> {
     @Override
-    public EntityModel<Term> toModel(Term entity) {
-        return EntityModel.of(entity,
+    public EntityModel<TermOutputDTO> toModel(Term entity) {
+        TermOutputDTO dto = entity.toDTO();
+        return EntityModel.of(dto,
                 linkTo(methodOn(TermController.class).one(entity.getId())).withSelfRel(),
                 linkTo(methodOn(TermController.class).all()).withRel("terms"));
     }

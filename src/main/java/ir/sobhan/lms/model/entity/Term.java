@@ -1,5 +1,7 @@
 package ir.sobhan.lms.model.entity;
 
+import ir.sobhan.lms.model.dto.MapperOutput;
+import ir.sobhan.lms.model.dto.outputdto.TermOutputDTO;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Setter
 @Getter
-public class Term {
+public class Term implements MapperOutput<TermOutputDTO> {
 
     @Id
     @GeneratedValue
@@ -25,4 +27,13 @@ public class Term {
 
     @OneToMany(mappedBy = "term")
     private List<CourseSection> courseSectionList;
+
+    @Override
+    public TermOutputDTO toDTO() {
+        return TermOutputDTO.builder()
+                .id(id)
+                .title(title)
+                .open(open)
+                .build();
+    }
 }

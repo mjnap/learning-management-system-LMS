@@ -1,11 +1,14 @@
 package ir.sobhan.lms;
 
 import ir.sobhan.lms.security.Role;
+import ir.sobhan.lms.service.UserService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
@@ -28,11 +31,11 @@ import org.springframework.web.context.WebApplicationContext;
 @WebAppConfiguration
 public class IntegrationTest {
 
-    @Autowired
-    WebApplicationContext webApplicationContext;
+    @MockBean
+    UserService userService;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    WebApplicationContext webApplicationContext;
 
     private MockMvc mockMvc;
 
@@ -56,7 +59,7 @@ public class IntegrationTest {
                 "}"))
                 .andExpect(status().isCreated());
 
-        this.mockMvc.perform(post("/admin/newInstructor").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/admin/new-instructor").contentType(MediaType.APPLICATION_JSON)
                 .content("{" +
                         "  \"userName\": \"ali\"," +
                         "  \"rank\": \"FULL\"" +
@@ -73,7 +76,7 @@ public class IntegrationTest {
                         "}"))
                 .andExpect(status().isCreated());
 
-        this.mockMvc.perform(post("/admin/newStudent").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/admin/new-student").contentType(MediaType.APPLICATION_JSON)
                 .content("{" +
                         "  \"userName\": \"kia\"," +
                         "  \"studentId\": \"1234\"," +
@@ -82,7 +85,7 @@ public class IntegrationTest {
                 .andExpect(status().isCreated());
 
         //termId == 5
-        this.mockMvc.perform(post("/admin/newTerm").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/admin/new-term").contentType(MediaType.APPLICATION_JSON)
                 .content("{" +
                         "  \"title\": \"first semester\"," +
                         "  \"open\": true" +
@@ -90,7 +93,7 @@ public class IntegrationTest {
                 .andExpect(status().isCreated());
 
         //courseId == 6
-        this.mockMvc.perform(post("/admin/newCourse").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/admin/new-course").contentType(MediaType.APPLICATION_JSON)
                 .content("{" +
                         "  \"title\": \"math\"," +
                         "  \"units\": 5" +
@@ -102,7 +105,7 @@ public class IntegrationTest {
                 .apply(springSecurity())
                 .build();
         //courseSectionId == 7
-        this.mockMvc.perform(post("/instructors/newCourseSection").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/instructors/new-course-section").contentType(MediaType.APPLICATION_JSON)
                 .with(user("ali").password("ali123").roles(Role.INSTRUCTOR.name()))
                 .content("{" +
                         "  \"courseTitle\": \"math\"," +
@@ -110,13 +113,9 @@ public class IntegrationTest {
                         "}"))
                 .andExpect(status().isCreated());
 
-        try{
-            this.mockMvc.perform(post("/students/registerCourse/{courseSectionId}" , 7)
-                    .with(user("kia").password("kia123").roles(Role.STUDENT.name())))
-                    .andExpect(status().isCreated());
-        }catch (Exception e){
-            e.getStackTrace();
-        }
+        this.mockMvc.perform(post("/students/register-course").param("courseSectionId","7")
+                .with(user("kia").password("kia123").roles(Role.STUDENT.name())))
+                .andExpect(status().isCreated());
 
         this.mockMvc.perform(put("/instructors/grading").contentType(MediaType.APPLICATION_JSON)
                 .with(user("ali").password("ali123").roles(Role.INSTRUCTOR.name()))
@@ -131,7 +130,7 @@ public class IntegrationTest {
                         "}"))
                 .andExpect(status().isOk());
 
-        this.mockMvc.perform(get("/students/semesterGrades/{termId}" , 5)
+        this.mockMvc.perform(get("/students/semester-grades/{termId}" , 5)
                 .with(user("kia").password("kia123").roles(Role.STUDENT.name())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.average").value(18.5));

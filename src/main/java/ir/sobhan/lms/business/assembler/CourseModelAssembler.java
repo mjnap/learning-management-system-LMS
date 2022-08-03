@@ -1,6 +1,7 @@
 package ir.sobhan.lms.business.assembler;
 
 import ir.sobhan.lms.controller.CourseController;
+import ir.sobhan.lms.model.dto.outputdto.CourseOutputDTO;
 import ir.sobhan.lms.model.entity.Course;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
@@ -8,10 +9,11 @@ import org.springframework.stereotype.Component;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @Component
-public class CourseModelAssembler implements RepresentationModelAssembler<Course, EntityModel<Course>> {
+public class CourseModelAssembler implements RepresentationModelAssembler<Course, EntityModel<CourseOutputDTO>> {
     @Override
-    public EntityModel<Course> toModel(Course entity) {
-        return EntityModel.of(entity,
+    public EntityModel<CourseOutputDTO> toModel(Course entity) {
+        CourseOutputDTO dto = entity.toDTO();
+        return EntityModel.of(dto,
                 linkTo(methodOn(CourseController.class).one(entity.getId())).withSelfRel(),
                 linkTo(methodOn(CourseController.class).all()).withRel("courses"));
     }

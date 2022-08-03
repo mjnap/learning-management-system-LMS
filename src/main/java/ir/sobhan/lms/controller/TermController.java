@@ -3,6 +3,7 @@ package ir.sobhan.lms.controller;
 import ir.sobhan.lms.business.assembler.TermModelAssembler;
 import ir.sobhan.lms.business.exceptions.TermNotFoundException;
 import ir.sobhan.lms.dao.TermRepository;
+import ir.sobhan.lms.model.dto.outputdto.TermOutputDTO;
 import ir.sobhan.lms.model.entity.Term;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
@@ -26,9 +27,9 @@ public class TermController {
     private final TermModelAssembler termAssembler;
 
     @GetMapping()
-    public CollectionModel<EntityModel<Term>> all(){
+    public CollectionModel<EntityModel<TermOutputDTO>> all(){
 
-        List<EntityModel<Term>> modelList = termRepository.findAll().stream()
+        List<EntityModel<TermOutputDTO>> modelList = termRepository.findAll().stream()
                 .map(termAssembler::toModel)
                 .collect(Collectors.toList());
 
@@ -37,7 +38,7 @@ public class TermController {
     }
 
     @GetMapping("/{id}")
-    public EntityModel<Term> one(@PathVariable Long id){
+    public EntityModel<TermOutputDTO> one(@PathVariable Long id){
 
         Term term = termRepository.findById(id).orElseThrow(() -> new TermNotFoundException(id));
 

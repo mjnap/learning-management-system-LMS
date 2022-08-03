@@ -4,21 +4,20 @@ import ir.sobhan.lms.business.assembler.*;
 import ir.sobhan.lms.business.exceptions.*;
 import ir.sobhan.lms.dao.*;
 import ir.sobhan.lms.model.dto.inputdto.*;
+import ir.sobhan.lms.model.dto.outputdto.CourseOutputDTO;
 import ir.sobhan.lms.model.dto.outputdto.InstructorOutputDTO;
 import ir.sobhan.lms.model.dto.outputdto.StudentOutputDTO;
+import ir.sobhan.lms.model.dto.outputdto.TermOutputDTO;
 import ir.sobhan.lms.model.entity.*;
 import ir.sobhan.lms.security.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/admin")
@@ -31,7 +30,7 @@ public class AdminController {
     private final InstructorModelAssembler instructorAssembler;
     private final InstructorRepository instructorRepository;
 
-    @PostMapping("/newInstructor")
+    @PostMapping("/new-instructor")
     public ResponseEntity<?> newInstructor(@RequestBody InstructorInputDTO instructorInputDTO){
 
         User user = userRepository.findByUserName(instructorInputDTO.getUserName())
@@ -51,7 +50,7 @@ public class AdminController {
                 .body(instructorModel);
     }
 
-    @PutMapping("/updateInstructor/{instructorId}")
+    @PutMapping("/update-instructor/{instructorId}")
     public ResponseEntity<?> updateInstructor(@PathVariable Long instructorId,
                                               @RequestBody InstructorUpdateInputDTO instructorUpdateInputDTO){
 
@@ -65,10 +64,11 @@ public class AdminController {
                 })
                 .orElseThrow(() -> new InstructorNotFoundException(instructorId));
 
-        return ResponseEntity.ok(instructorAssembler.toModel(updateInstructor));
+        return ResponseEntity
+                .ok(instructorAssembler.toModel(updateInstructor));
     }
 
-    @DeleteMapping("/deleteInstructor/{userName}")
+    @DeleteMapping("/delete-instructor/{userName}")
     @Transactional
     public ResponseEntity<?> deleteInstructor(@PathVariable String userName){
         instructorRepository.deleteByUser_UserName(userName);
@@ -79,7 +79,7 @@ public class AdminController {
     private final StudentModelAssembler studentAssembler;
     private final StudentRepository studentRepository;
 
-    @PostMapping("/newStudent")
+    @PostMapping("/new-student")
     public ResponseEntity<?> newStudent(@RequestBody StudentInputDTO studentInputDTO){
 
         User user = userRepository.findByUserName(studentInputDTO.getUserName())
@@ -101,7 +101,7 @@ public class AdminController {
                 .body(studentModel);
     }
 
-    @PutMapping("/updateStudent/{studentId}")
+    @PutMapping("/update-student/{studentId}")
     public ResponseEntity<?> updateStudent(@PathVariable Long studentId,
                                            @RequestBody StudentUpdateInputDTO studentUpdateInputDTO){
 
@@ -119,7 +119,7 @@ public class AdminController {
                 .ok(studentAssembler.toModel(updateStudent));
     }
 
-    @DeleteMapping("/deleteStudent/{userName}")
+    @DeleteMapping("/delete-student/{userName}")
     @Transactional
     public ResponseEntity<?> deleteStudent(@PathVariable String userName){
         studentRepository.deleteByUser_UserName(userName);
@@ -130,19 +130,19 @@ public class AdminController {
     private final TermModelAssembler termAssembler;
     private final TermRepository termRepository;
 
-    @PostMapping("/newTerm")
+    @PostMapping("/new-term")
     public ResponseEntity<?> newTerm(@RequestBody TermInputDTO termInputDTO){
 
         Term newTerm = termInputDTO.toEntity();
 
-        EntityModel<Term> termModel = termAssembler.toModel(termRepository.save(newTerm));
+        EntityModel<TermOutputDTO> termModel = termAssembler.toModel(termRepository.save(newTerm));
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(termModel);
     }
 
-    @PutMapping("/updateTerm/{termId}")
+    @PutMapping("/update-term/{termId}")
     public ResponseEntity<?> updateTerm(@PathVariable Long termId,
                                         @RequestBody TermInputDTO termInputDTO){
 
@@ -154,33 +154,36 @@ public class AdminController {
                 })
                 .orElseThrow(() -> new TermNotFoundException(termId));
 
-        return ResponseEntity.ok(updateTerm);
+        return ResponseEntity
+                .ok(updateTerm.toDTO());
     }
 
-    @DeleteMapping("/deleteTerm/{id}")
+    @DeleteMapping("/delete-term/{id}")
     @Transactional
     public ResponseEntity<?> deleteTerm(@PathVariable Long id){
         termRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     // Course -----------------------------------------
     private final CourseModelAssembler courseAssembler;
     private final CourseRepository courseRepository;
 
-    @PostMapping("/newCourse")
+    @PostMapping("/new-course")
     public ResponseEntity<?> newCourse(@RequestBody CourseInputDTO courseInputDTO){
 
         Course newCourse = courseInputDTO.toEntity();
 
-        EntityModel<Course> courseModel = courseAssembler.toModel(courseRepository.save(newCourse));
+        EntityModel<CourseOutputDTO> courseModel = courseAssembler.toModel(courseRepository.save(newCourse));
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(courseModel);
     }
 
-    @PutMapping("/updateCourse/{courseId}")
+    @PutMapping("/update-course/{courseId}")
     public ResponseEntity<?> updateCourse(@PathVariable Long courseId,
                                           @RequestBody CourseInputDTO courseInputDTO){
 
@@ -192,14 +195,17 @@ public class AdminController {
                 })
                 .orElseThrow(() -> new CourseNotFoundException(courseId));
 
-        return ResponseEntity.ok(updateCourse);
+        return ResponseEntity
+                .ok(updateCourse.toDTO());
     }
 
-    @DeleteMapping("/deleteCourse/{id}")
+    @DeleteMapping("/delete-course/{id}")
     @Transactional
     public ResponseEntity<?> deleteCurse(@PathVariable Long id){
         courseRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
 

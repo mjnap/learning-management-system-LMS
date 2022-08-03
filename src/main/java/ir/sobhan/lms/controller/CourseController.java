@@ -3,6 +3,7 @@ package ir.sobhan.lms.controller;
 import ir.sobhan.lms.business.assembler.CourseModelAssembler;
 import ir.sobhan.lms.business.exceptions.CourseNotFoundException;
 import ir.sobhan.lms.dao.CourseRepository;
+import ir.sobhan.lms.model.dto.outputdto.CourseOutputDTO;
 import ir.sobhan.lms.model.entity.Course;
 import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
@@ -25,9 +26,9 @@ public class CourseController {
     private final CourseModelAssembler courseAssembler;
 
     @GetMapping()
-    public CollectionModel<EntityModel<Course>> all(){
+    public CollectionModel<EntityModel<CourseOutputDTO>> all(){
 
-        List<EntityModel<Course>> modelList = courseRepository.findAll().stream()
+        List<EntityModel<CourseOutputDTO>> modelList = courseRepository.findAll().stream()
                 .map(courseAssembler::toModel)
                 .collect(Collectors.toList());
 
@@ -36,7 +37,7 @@ public class CourseController {
     }
 
     @GetMapping("/{id}")
-    public EntityModel<Course> one(@PathVariable Long id){
+    public EntityModel<CourseOutputDTO> one(@PathVariable Long id){
 
         Course course = courseRepository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
 
