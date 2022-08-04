@@ -8,21 +8,18 @@ import ir.sobhan.lms.dao.TermRepository;
 import ir.sobhan.lms.model.dto.other.SemesterGradesOutputDTO;
 import ir.sobhan.lms.model.entity.*;
 import ir.sobhan.lms.service.StudentService;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -79,6 +76,8 @@ class StudentControllerTest {
 
         when(courseSectionRegistrationRepository.findAllByCourseSection_Term_IdAndStudent_User_UserName(termId,"ali"))
                 .thenReturn(Arrays.asList(courseSectionRegistration1, courseSectionRegistration2));
+
+        when(termRepository.existsById(termId)).thenReturn(true);
     }
 
     @Test

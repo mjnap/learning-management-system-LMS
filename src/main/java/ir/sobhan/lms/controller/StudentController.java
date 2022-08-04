@@ -3,6 +3,7 @@ package ir.sobhan.lms.controller;
 import ir.sobhan.lms.business.assembler.StudentModelAssembler;
 import ir.sobhan.lms.business.exceptions.CourseSectionNotFoundException;
 import ir.sobhan.lms.business.exceptions.StudentNotFoundException;
+import ir.sobhan.lms.business.exceptions.TermNotFoundException;
 import ir.sobhan.lms.dao.CourseSectionRegistrationRepository;
 import ir.sobhan.lms.dao.CourseSectionRepository;
 import ir.sobhan.lms.dao.StudentRepository;
@@ -82,6 +83,9 @@ public class StudentController {
     @GetMapping("/semester-grades/{termId}")
     public ResponseEntity<?> semesterGrades(@PathVariable Long termId,
                                             Authentication authentication){
+
+        if(!termRepository.existsById(termId))
+            throw new TermNotFoundException(termId);
 
         List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
                 .findAllByCourseSection_Term_IdAndStudent_User_UserName(termId, authentication.getName());

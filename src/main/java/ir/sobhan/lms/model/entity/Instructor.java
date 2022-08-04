@@ -2,13 +2,14 @@ package ir.sobhan.lms.model.entity;
 
 import ir.sobhan.lms.model.dto.MapperOutput;
 import ir.sobhan.lms.model.dto.outputdto.InstructorOutputDTO;
-import ir.sobhan.lms.security.Role;
 import lombok.*;
-
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@Table(indexes = @Index(columnList = "user_id"))
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Getter
@@ -29,6 +30,7 @@ public class Instructor implements MapperOutput<InstructorOutputDTO> {
     private Rank level;
 
     @OneToMany(mappedBy = "instructor")
+    @Cascade(value = CascadeType.DELETE)
     private List<CourseSection> courseSectionList;
 
     @Override

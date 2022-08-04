@@ -7,7 +7,7 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "User_Table")
+@Table(name = "User_Table" , indexes = @Index(columnList = "userName"))
 @NoArgsConstructor
 @RequiredArgsConstructor
 @EqualsAndHashCode

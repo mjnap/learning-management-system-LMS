@@ -1,8 +1,7 @@
-package ir.sobhan.lms.service;
+package ir.sobhan.lms.security;
 
 import ir.sobhan.lms.dao.UserRepository;
 import ir.sobhan.lms.model.entity.User;
-import ir.sobhan.lms.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

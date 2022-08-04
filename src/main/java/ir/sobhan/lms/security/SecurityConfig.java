@@ -1,6 +1,5 @@
 package ir.sobhan.lms.security;
 
-import ir.sobhan.lms.service.UserPrincipalDetailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

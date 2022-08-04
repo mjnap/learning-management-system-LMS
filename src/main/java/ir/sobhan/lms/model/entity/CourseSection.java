@@ -3,12 +3,17 @@ package ir.sobhan.lms.model.entity;
 import ir.sobhan.lms.model.dto.MapperOutput;
 import ir.sobhan.lms.model.dto.outputdto.CourseSectionOutputDTO;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(indexes = {@Index(columnList = "instructor_id"),
+                  @Index(columnList = "course_id"),
+                  @Index(columnList = "term_id")})
 @NoArgsConstructor
 @Setter
 @Getter
@@ -32,6 +37,7 @@ public class CourseSection implements MapperOutput<CourseSectionOutputDTO> {
     private Term term;
 
     @OneToMany(mappedBy = "courseSection")
+    @Cascade(value = CascadeType.DELETE)
     private List<CourseSectionRegistration> courseSectionRegistrationList = new ArrayList<>();
 
     @Override

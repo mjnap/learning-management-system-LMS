@@ -16,8 +16,11 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
+
+import javax.transaction.Transactional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
@@ -109,21 +112,23 @@ public class InstructorController {
     }
 
     @DeleteMapping("/delete-course-section/{courseSectionId}")
+    @Transactional
     public ResponseEntity<?> deleteCourseSection(@PathVariable Long courseSectionId,
                                                  Authentication authentication){
 
         CourseSection courseSection = courseSectionRepository.findById(courseSectionId)
                 .orElseThrow(() -> new CourseNotFoundException(courseSectionId));
 
-        if(!courseSection.getInstructor().getUser().getUserName().equals(authentication.getName()))
+        if(!courseSection.getInstructor().getUser().getUserName().equals(authentication.getName()) &&
+            !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")))
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body("You are not the instructor of this course section");
 
-        if(courseSection.getCourseSectionRegistrationList().isEmpty())
+        if(!courseSection.getCourseSectionRegistrationList().isEmpty())
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
-                    .body("There are no students");
+                    .body("You can not delete this course section");
 
         courseSectionRepository.delete(courseSection);
         return ResponseEntity

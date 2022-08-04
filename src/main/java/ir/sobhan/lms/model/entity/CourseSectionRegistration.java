@@ -2,12 +2,11 @@ package ir.sobhan.lms.model.entity;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
+@Table(indexes = {@Index(columnList = "course_section_id") ,
+                  @Index(columnList = "student_id")})
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Setter

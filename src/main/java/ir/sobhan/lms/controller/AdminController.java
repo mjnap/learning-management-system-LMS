@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
+import java.util.Arrays;
 import java.util.Date;
 
 @RestController
@@ -71,8 +72,25 @@ public class AdminController {
     @DeleteMapping("/delete-instructor/{userName}")
     @Transactional
     public ResponseEntity<?> deleteInstructor(@PathVariable String userName){
+
         instructorRepository.deleteByUser_UserName(userName);
-        return ResponseEntity.noContent().build();
+
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new UserNotFoundException(userName));
+
+        String[] roles = user.getRoles().split(" ");
+        String newRoles = "";
+        for(String role:roles)
+            if(!role.equals(Role.INSTRUCTOR.name()))
+                newRoles += role;
+
+        user.setRoles(newRoles);
+        user.setActive(false);
+        userRepository.save(user);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     // Student -----------------------------------------
@@ -123,7 +141,23 @@ public class AdminController {
     @Transactional
     public ResponseEntity<?> deleteStudent(@PathVariable String userName){
         studentRepository.deleteByUser_UserName(userName);
-        return ResponseEntity.noContent().build();
+
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> new UserNotFoundException(userName));
+
+        String[] roles = user.getRoles().split(" ");
+        String newRoles = "";
+        for(String role:roles)
+            if(!role.equals(Role.STUDENT.name()))
+                newRoles += role;
+
+        user.setRoles(newRoles);
+        user.setActive(false);
+        userRepository.save(user);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     // Term ---------------------------------------
