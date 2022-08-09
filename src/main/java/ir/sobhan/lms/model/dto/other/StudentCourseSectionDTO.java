@@ -16,7 +16,7 @@ public class StudentCourseSectionDTO {
 
     public static StudentCourseSectionDTO toDTO(CourseSectionRegistration courseSectionRegistration){
         return StudentCourseSectionDTO.builder()
-                .userId(courseSectionRegistration.getStudent().getId())//todo آیدی یوزرش یا آیدی خودش؟
+                .userId(courseSectionRegistration.getStudent().getId())
                 .name(courseSectionRegistration.getStudent().getUser().getName())
                 .studentId(courseSectionRegistration.getStudent().getStudentId())
                 .score(courseSectionRegistration.getScore())

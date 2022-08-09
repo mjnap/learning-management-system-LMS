@@ -14,6 +14,7 @@ import org.springframework.hateoas.EntityModel;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,6 +54,11 @@ public class UserController {
 
     @PostMapping()
     public ResponseEntity<?> newUser(@RequestBody UserInputDTO userInputDTO){
+
+        if(userRepository.existsByUserName(userInputDTO.getUserName()))
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("This username already exists");
 
         User user = userInputDTO.toEntity();
         user.setPassword(passwordEncoder.encode(userInputDTO.getPassword()));

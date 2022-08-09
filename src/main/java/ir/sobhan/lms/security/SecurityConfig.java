@@ -27,9 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf()
-                    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                    .ignoringAntMatchers("/**")
-                .and()
+                    .disable()
                 .authorizeRequests()
                     .antMatchers(HttpMethod.GET, "/instructors/get-students-of-course-section/**").hasAnyRole(Role.INSTRUCTOR.name(),Role.ADMIN.name())
                     .antMatchers("/instructors/update-course-section").hasAnyRole(Role.INSTRUCTOR.name(),Role.ADMIN.name())

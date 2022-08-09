@@ -74,6 +74,11 @@ public class InstructorController {
         Term term = termRepository.findById(courseSectionInputDTO.getTermId())
                 .orElseThrow(() -> new TermNotFoundException(courseSectionInputDTO.getTermId()));
 
+        if(!term.isOpen())
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("The term is not open");
+
         CourseSection newCourseSection = new CourseSection(instructor,course,term);
 
         CourseSectionOutputDTO outputDTO = courseSectionRepository.save(newCourseSection).toDTO();

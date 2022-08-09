@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class StudentControllerTest {
 
     final Long termId = 2L;
+    final String userName = "ali";
 
     @MockBean
     Authentication authentication;
@@ -50,7 +51,7 @@ class StudentControllerTest {
 
     @BeforeEach
     void setUp() {
-        when(authentication.getName()).thenReturn("ali");
+        when(authentication.getName()).thenReturn(userName);
 
         Instructor instructor = new Instructor();
         User user = new User();
@@ -74,7 +75,7 @@ class StudentControllerTest {
         courseSectionRegistration2.setCourseSection(courseSection);
         courseSectionRegistration2.setScore(18.95D);
 
-        when(courseSectionRegistrationRepository.findAllByCourseSection_Term_IdAndStudent_User_UserName(termId,"ali"))
+        when(courseSectionRegistrationRepository.findAllByCourseSection_Term_IdAndStudent_User_UserName(termId,userName))
                 .thenReturn(Arrays.asList(courseSectionRegistration1, courseSectionRegistration2));
 
         when(termRepository.existsById(termId)).thenReturn(true);
@@ -87,7 +88,7 @@ class StudentControllerTest {
 
         assertEquals(17.61,semesterGradesOutputDTO.getAverage());
 
-        when(courseSectionRegistrationRepository.findAllByCourseSection_Term_IdAndStudent_User_UserName(termId,"ali"))
+        when(courseSectionRegistrationRepository.findAllByCourseSection_Term_IdAndStudent_User_UserName(termId,userName))
                 .thenReturn(new ArrayList<>());
         responseEntity = studentController.semesterGrades(termId,authentication);
         semesterGradesOutputDTO = (SemesterGradesOutputDTO) responseEntity.getBody();
