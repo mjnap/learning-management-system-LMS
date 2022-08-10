@@ -14,7 +14,7 @@ public class StudentCourseSectionDTO {
     private String studentId;
     private Double score;
 
-    public static StudentCourseSectionDTO toDTO(CourseSectionRegistration courseSectionRegistration){
+    public static StudentCourseSectionDTO toDTO(CourseSectionRegistration courseSectionRegistration) {
         return StudentCourseSectionDTO.builder()
                 .userId(courseSectionRegistration.getStudent().getId())
                 .name(courseSectionRegistration.getStudent().getUser().getName())

@@ -5,6 +5,7 @@ import ir.sobhan.lms.model.dto.outputdto.InstructorOutputDTO;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -14,8 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
-@ToString
 public class Instructor implements MapperOutput<InstructorOutputDTO> {
 
     @Id

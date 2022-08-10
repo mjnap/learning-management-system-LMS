@@ -1,140 +1,91 @@
 package ir.sobhan.lms.controller;
 
-import ir.sobhan.lms.business.assembler.StudentModelAssembler;
-import ir.sobhan.lms.business.exceptions.CourseSectionNotFoundException;
-import ir.sobhan.lms.business.exceptions.StudentNotFoundException;
-import ir.sobhan.lms.business.exceptions.TermNotFoundException;
-import ir.sobhan.lms.dao.CourseSectionRegistrationRepository;
-import ir.sobhan.lms.dao.CourseSectionRepository;
-import ir.sobhan.lms.dao.StudentRepository;
-import ir.sobhan.lms.dao.TermRepository;
-import ir.sobhan.lms.model.dto.other.SemesterGradesOutputDTO;
-import ir.sobhan.lms.model.dto.other.ListSemesterOutputDTO;
-import ir.sobhan.lms.model.dto.outputdto.SummaryOutputDTO;
-import ir.sobhan.lms.model.dto.outputdto.TermOutputSummaryDTO;
-import ir.sobhan.lms.model.entity.CourseSectionRegistration;
-import ir.sobhan.lms.model.entity.Student;
+import ir.sobhan.lms.model.dto.inputdto.StudentInputDTO;
+import ir.sobhan.lms.model.dto.inputdto.StudentUpdateInputDTO;
 import ir.sobhan.lms.model.dto.outputdto.StudentOutputDTO;
-import ir.sobhan.lms.model.entity.Term;
+import ir.sobhan.lms.model.entity.Degree;
+import ir.sobhan.lms.model.entity.Student;
+import ir.sobhan.lms.model.entity.User;
+import ir.sobhan.lms.security.Role;
+import ir.sobhan.lms.service.CourseSectionRegistrationService;
 import ir.sobhan.lms.service.StudentService;
+import ir.sobhan.lms.service.TermService;
+import ir.sobhan.lms.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-
-import java.util.ArrayList;
-import java.util.Collections;
+import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/students")
 public class StudentController {
 
-    private final StudentRepository studentRepository;
-    private final StudentModelAssembler studentAssembler;
     private final StudentService studentService;
-    private final CourseSectionRepository courseSectionRepository;
-    private final CourseSectionRegistrationRepository courseSectionRegistrationRepository;
-    private final TermRepository termRepository;
+    private final UserService userService;
+    private final TermService termService;
+    private final CourseSectionRegistrationService courseSectionRegistrationService;
 
     @GetMapping()
-    public CollectionModel<EntityModel<StudentOutputDTO>> all(){
-
-        List<EntityModel<StudentOutputDTO>> modelList = studentRepository.findAll().stream()
-                .map(studentAssembler::toModel)
-                .collect(Collectors.toList());
-
-        return CollectionModel.of(modelList,
-                linkTo(methodOn(StudentController.class).all()).withSelfRel());
+    public List<StudentOutputDTO> all(@RequestParam int size, @RequestParam int page) {
+        return studentService.getAll(PageRequest.of(page, size));
     }
 
     @GetMapping("/{userName}")
-    public EntityModel<StudentOutputDTO> one(@PathVariable String userName){
-
-        Student student = studentRepository.findByUser_UserName(userName).orElseThrow(() -> new StudentNotFoundException(userName));
-
-        return studentAssembler.toModel(student);
+    public StudentOutputDTO one(@PathVariable String userName) {
+        return studentService.getOne(userName).toDTO();
     }
 
-    @PostMapping("/register-course")
-    public ResponseEntity<?> registerCourse(@RequestParam Long courseSectionId,
-                                            Authentication authentication){
+    @PostMapping("/new-student")
+    public ResponseEntity<?> newStudent(@RequestBody StudentInputDTO studentInputDTO) {
 
-        CourseSectionRegistration courseSectionRegistration = new CourseSectionRegistration(
-                courseSectionRepository.findById(courseSectionId)
-                        .orElseThrow(() -> new CourseSectionNotFoundException(courseSectionId)),
-                studentRepository.findByUser_UserName(authentication.getName())
-                        .orElseThrow(() -> new StudentNotFoundException(authentication.getName())));
+        User user = userService.getOne(studentInputDTO.getUserName());
+        userService.addRoleToUser(user, Role.STUDENT);
 
-        courseSectionRegistrationRepository.save(courseSectionRegistration);
+        Student student = new Student(user,
+                studentInputDTO.getStudentId(),
+                Degree.valueOf(studentInputDTO.getDegree().toUpperCase()),
+                new Date());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body("Registration is done");
+                .body(studentService.save(student).toDTO());
+    }
+
+    @PutMapping("/update-student/{studentId}")
+    public ResponseEntity<?> updateStudent(@PathVariable Long studentId,
+                                           @RequestBody StudentUpdateInputDTO studentUpdateInputDTO) {
+        return ResponseEntity
+                .ok(studentService.update(studentId, studentUpdateInputDTO));
+    }
+
+    @DeleteMapping("/delete-student/{userName}")
+    @Transactional
+    public ResponseEntity<?> deleteStudent(@PathVariable String userName) {
+        studentService.delete(userName);
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     @GetMapping("/semester-grades/{termId}")
     public ResponseEntity<?> semesterGrades(@PathVariable Long termId,
-                                            Authentication authentication){
+                                            Authentication authentication) {
+        termService.checkExist(termId);
 
-        if(!termRepository.existsById(termId))
-            throw new TermNotFoundException(termId);
-
-        List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
-                .findAllByCourseSection_Term_IdAndStudent_User_UserName(termId, authentication.getName());
-
-        if(courseList == null)
-            return ResponseEntity.ok(Collections.EMPTY_LIST);
-
-        Double avg = studentService.average(courseList);
-
-        List<ListSemesterOutputDTO> sectionOutputDTOList = new ArrayList<>();
-        courseList.forEach(course -> {
-            sectionOutputDTOList.add(ListSemesterOutputDTO.builder()
-                    .CourseSectionId(course.getCourseSection().getId())
-                    .course(course.getCourseSection().getCourse().getTitle())
-                    .units(course.getCourseSection().getCourse().getUnits())
-                    .instructorName(course.getCourseSection().getInstructor().getUser().getName())
-                    .score(course.getScore())
-                    .build());
-        });
-
-        return ResponseEntity.ok(SemesterGradesOutputDTO.builder()
-                .average(avg)
-                .courseSectionList(sectionOutputDTOList)
-                .build());
+        return ResponseEntity
+                .ok(studentService.showSemester(courseSectionRegistrationService.findByTermIdAndUserName(termId, authentication.getName())));
     }
 
     @GetMapping("/summary")
-    public ResponseEntity<?> summary(Authentication authentication){
-
-        List<Term> termList = termRepository.findAll();
-
-        List<TermOutputSummaryDTO> termOutputSummaryDTOList = new ArrayList<>();
-
-        termList.forEach(term -> {
-            List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
-                    .findAllByCourseSection_Term_IdAndStudent_User_UserName(term.getId(),authentication.getName());
-
-            termOutputSummaryDTOList.add(TermOutputSummaryDTO.builder()
-                    .termId(term.getId())
-                    .termTile(term.getTitle())
-                    .termAverage(studentService.average(courseList))
-                    .build());
-        });
-
-        return ResponseEntity.ok(SummaryOutputDTO.builder()
-                .totalAverage(courseSectionRegistrationRepository.totalAverage(
-                        studentRepository.findByUser_UserName(authentication.getName()).orElseThrow(() -> new StudentNotFoundException(authentication.getName()))
-                        .getId()))
-                .termList(termOutputSummaryDTOList)
-                .build());
+    public ResponseEntity<?> summary(Authentication authentication) {
+        return ResponseEntity
+                .ok(studentService.showSummery(termService.getAll(), authentication));
     }
 }

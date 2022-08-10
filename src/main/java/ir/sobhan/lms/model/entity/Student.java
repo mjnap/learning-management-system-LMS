@@ -16,8 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Setter
 @Getter
-@EqualsAndHashCode
-@ToString
 public class Student implements MapperOutput<StudentOutputDTO> {
 
     @Id
@@ -29,7 +27,7 @@ public class Student implements MapperOutput<StudentOutputDTO> {
     private User user;
 
     @NonNull
-    @Column(unique = true , nullable = false)
+    @Column(unique = true, nullable = false)
     private String studentId;
 
     @NonNull

@@ -5,8 +5,8 @@ import lombok.*;
 import javax.persistence.*;
 
 @Entity
-@Table(indexes = {@Index(columnList = "course_section_id") ,
-                  @Index(columnList = "student_id")})
+@Table(indexes = {@Index(columnList = "course_section_id"),
+        @Index(columnList = "student_id")})
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Setter

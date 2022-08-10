@@ -1,47 +1,54 @@
 package ir.sobhan.lms.controller;
 
-import ir.sobhan.lms.business.assembler.TermModelAssembler;
-import ir.sobhan.lms.business.exceptions.TermNotFoundException;
-import ir.sobhan.lms.dao.TermRepository;
+import ir.sobhan.lms.model.dto.inputdto.TermInputDTO;
 import ir.sobhan.lms.model.dto.outputdto.TermOutputDTO;
-import ir.sobhan.lms.model.entity.Term;
+import ir.sobhan.lms.service.TermService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/terms")
 @RequiredArgsConstructor
 public class TermController {
 
-    private final TermRepository termRepository;
-    private final TermModelAssembler termAssembler;
+    private final TermService termService;
 
     @GetMapping()
-    public CollectionModel<EntityModel<TermOutputDTO>> all(){
-
-        List<EntityModel<TermOutputDTO>> modelList = termRepository.findAll().stream()
-                .map(termAssembler::toModel)
-                .collect(Collectors.toList());
-
-        return CollectionModel.of(modelList,
-                linkTo(methodOn(TermController.class).all()).withSelfRel());
+    public List<TermOutputDTO> all(@RequestParam int size, @RequestParam int page) {
+        return termService.getAll(PageRequest.of(page, size));
     }
 
     @GetMapping("/{id}")
-    public EntityModel<TermOutputDTO> one(@PathVariable Long id){
+    public TermOutputDTO one(@PathVariable Long id) {
+        return termService.getOne(id).toDTO();
+    }
 
-        Term term = termRepository.findById(id).orElseThrow(() -> new TermNotFoundException(id));
+    @PostMapping("/new-term")
+    public ResponseEntity<?> newTerm(@RequestBody TermInputDTO termInputDTO) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(termService.save(termInputDTO.toEntity()));
+    }
 
-        return termAssembler.toModel(term);
+    @PutMapping("/update-term/{termId}")
+    public ResponseEntity<?> updateTerm(@PathVariable Long termId,
+                                        @RequestBody TermInputDTO termInputDTO) {
+        return ResponseEntity
+                .ok(termService.update(termId, termInputDTO));
+    }
+
+    @DeleteMapping("/delete-term/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteTerm(@PathVariable Long id) {
+        termService.delete(id);
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }

@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 @Configuration
 @EnableWebSecurity
@@ -29,15 +28,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf()
                     .disable()
                 .authorizeRequests()
-                    .antMatchers(HttpMethod.GET, "/instructors/get-students-of-course-section/**").hasAnyRole(Role.INSTRUCTOR.name(),Role.ADMIN.name())
-                    .antMatchers("/instructors/update-course-section").hasAnyRole(Role.INSTRUCTOR.name(),Role.ADMIN.name())
-                    .antMatchers(HttpMethod.DELETE, "/instructors/**").hasAnyRole(Role.INSTRUCTOR.name(),Role.ADMIN.name())
-                    .antMatchers( "/students/summary").hasRole(Role.STUDENT.name())
-                    .antMatchers("/students/semester-grades/**").hasRole(Role.STUDENT.name())
-                    .antMatchers(HttpMethod.POST, "/students/**").hasRole(Role.STUDENT.name())
-                    .antMatchers(HttpMethod.POST, "/instructors/**").hasRole(Role.INSTRUCTOR.name())
-                    .antMatchers(HttpMethod.PUT, "/instructors/**").hasRole(Role.INSTRUCTOR.name())
-                    .antMatchers("/admin/**").hasRole(Role.ADMIN.name())
+                    .antMatchers("/course-sections/update/**", "/course-sections/delete/**",
+                            "/course-sections/get-students/**").hasAnyRole(Role.INSTRUCTOR.name(), Role.ADMIN.name())
+                    .antMatchers("/course-section-registrations/register-course", "/students/semester-grades/**",
+                            "/students/summary").hasRole(Role.STUDENT.name())
+                    .antMatchers("/course-sections/create", "/course-section-registrations/grading").hasRole(Role.INSTRUCTOR.name())
+                    .antMatchers("/courses/new-course", "/courses/update-course/**", "/courses/delete-course/**",
+                            "/instructors/new-instructor", "/instructors/update-instructor/**", "/instructors/delete-instructor/**",
+                            "/students/new-student", "/students/update-student/**", "/students/delete-student/**",
+                            "/terms/new-term", "/terms/update-term/**", "/terms/delete-term/**").hasRole(Role.ADMIN.name())
                     .antMatchers(HttpMethod.POST, "/users").anonymous()
                 .anyRequest()
                     .authenticated()

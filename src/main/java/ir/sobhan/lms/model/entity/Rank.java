@@ -5,7 +5,7 @@ import javax.persistence.Enumerated;
 
 public enum Rank {
     @Enumerated(value = EnumType.STRING)
-    ASSISTANT ,
+    ASSISTANT,
     @Enumerated(value = EnumType.STRING)
     FULL
 }

@@ -1,46 +1,54 @@
 package ir.sobhan.lms.controller;
 
-import ir.sobhan.lms.business.assembler.CourseModelAssembler;
-import ir.sobhan.lms.business.exceptions.CourseNotFoundException;
-import ir.sobhan.lms.dao.CourseRepository;
+import ir.sobhan.lms.model.dto.inputdto.CourseInputDTO;
 import ir.sobhan.lms.model.dto.outputdto.CourseOutputDTO;
-import ir.sobhan.lms.model.entity.Course;
+import ir.sobhan.lms.service.CourseService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/courses")
 @RequiredArgsConstructor
 public class CourseController {
 
-    private final CourseRepository courseRepository;
-    private final CourseModelAssembler courseAssembler;
+    private final CourseService courseService;
 
     @GetMapping()
-    public CollectionModel<EntityModel<CourseOutputDTO>> all(){
-
-        List<EntityModel<CourseOutputDTO>> modelList = courseRepository.findAll().stream()
-                .map(courseAssembler::toModel)
-                .collect(Collectors.toList());
-
-        return CollectionModel.of(modelList,
-                linkTo(methodOn(CourseController.class).all()).withSelfRel());
+    public List<CourseOutputDTO> all(@RequestParam int size, @RequestParam int page) {
+        return courseService.getAll(PageRequest.of(page, size));
     }
 
     @GetMapping("/{id}")
-    public EntityModel<CourseOutputDTO> one(@PathVariable Long id){
+    public CourseOutputDTO one(@PathVariable Long id) {
+        return courseService.getOne(id).toDTO();
+    }
 
-        Course course = courseRepository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+    @PostMapping("/new-course")
+    public ResponseEntity<?> newCourse(@RequestBody CourseInputDTO courseInputDTO) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(courseService.save(courseInputDTO.toEntity()));
+    }
 
-        return courseAssembler.toModel(course);
+    @PutMapping("/update-course/{courseId}")
+    public ResponseEntity<?> updateCourse(@PathVariable Long courseId,
+                                          @RequestBody CourseInputDTO courseInputDTO) {
+        return ResponseEntity
+                .ok(courseService.update(courseId, courseInputDTO));
+    }
+
+    @DeleteMapping("/delete-course/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
+        courseService.delete(id);
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }

@@ -10,8 +10,9 @@ import java.util.List;
 @Repository
 public interface CourseSectionRegistrationRepository extends JpaRepository<CourseSectionRegistration, Long> {
     CourseSectionRegistration findByCourseSection_IdAndStudent_Id(Long courseSectionId, Long studentId);
+
     List<CourseSectionRegistration> findAllByCourseSection_Term_IdAndStudent_User_UserName(Long termId, String userName);
 
-    @Query(nativeQuery = true , value = "SELECT AVG(score) FROM course_section_registration WHERE student_id=?")
+    @Query(nativeQuery = true, value = "SELECT AVG(score) FROM course_section_registration WHERE student_id=?")
     Double totalAverage(Long studentId);
 }

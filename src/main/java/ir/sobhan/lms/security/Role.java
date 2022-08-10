@@ -13,7 +13,7 @@ public enum Role {
     @Enumerated(value = EnumType.STRING)
     USER;
 
-    public static String[] getAllRoles(){
+    public static String[] getAllRoles() {
         return new String[]{
                 ADMIN.name(),
                 STUDENT.name(),

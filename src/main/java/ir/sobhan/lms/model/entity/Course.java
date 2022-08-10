@@ -22,7 +22,7 @@ public class Course implements MapperOutput<CourseOutputDTO> {
     private Long id;
 
     @NonNull
-    @Column(unique = true , nullable = false)
+    @Column(unique = true, nullable = false)
     private String title;
 
     @NonNull

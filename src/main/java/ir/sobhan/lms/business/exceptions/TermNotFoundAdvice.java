@@ -12,5 +12,7 @@ public class TermNotFoundAdvice {
     @ResponseBody
     @ExceptionHandler(TermNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    String TermNotFoundHandler(TermNotFoundException e){return e.getMessage();}
+    String TermNotFoundHandler(TermNotFoundException e) {
+        return e.getMessage();
+    }
 }

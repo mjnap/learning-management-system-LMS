@@ -11,9 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(indexes = {@Index(columnList = "instructor_id"),
-                  @Index(columnList = "course_id"),
-                  @Index(columnList = "term_id")})
+@Table(indexes = {@Index(columnList = "term_id, instructor_id, course_id"),
+        @Index(columnList = "term_id, instructor_id"),
+        @Index(columnList = "term_id, course_id"),
+        @Index(columnList = "term_id")})
 @NoArgsConstructor
 @Setter
 @Getter

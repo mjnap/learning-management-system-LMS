@@ -1,16 +1,14 @@
 package ir.sobhan.lms.controller;
 
-import ir.sobhan.lms.business.assembler.StudentModelAssembler;
-import ir.sobhan.lms.dao.CourseSectionRegistrationRepository;
-import ir.sobhan.lms.dao.CourseSectionRepository;
 import ir.sobhan.lms.dao.StudentRepository;
-import ir.sobhan.lms.dao.TermRepository;
 import ir.sobhan.lms.model.dto.other.SemesterGradesOutputDTO;
 import ir.sobhan.lms.model.entity.*;
+import ir.sobhan.lms.service.CourseSectionRegistrationService;
 import ir.sobhan.lms.service.StudentService;
+import ir.sobhan.lms.service.TermService;
+import ir.sobhan.lms.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,10 +19,12 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
-@ContextConfiguration(classes = {StudentController.class , StudentService.class})
+@ContextConfiguration(classes = {StudentController.class, StudentService.class})
 class StudentControllerTest {
 
     final Long termId = 2L;
@@ -33,20 +33,18 @@ class StudentControllerTest {
     @MockBean
     Authentication authentication;
     @MockBean
-    CourseSectionRegistrationRepository courseSectionRegistrationRepository;
+    UserService userService;
+    @MockBean
+    TermService termService;
+    @MockBean
+    CourseSectionRegistrationService courseSectionRegistrationService;
     @MockBean
     StudentRepository studentRepository;
-    @MockBean
-    StudentModelAssembler studentAssembler;
-    @MockBean
-    CourseSectionRepository courseSectionRepository;
-    @MockBean
-    TermRepository termRepository;
 
     @Autowired
-    StudentController studentController;
-    @Autowired
     StudentService studentService;
+    @Autowired
+    StudentController studentController;
 
 
     @BeforeEach
@@ -75,24 +73,26 @@ class StudentControllerTest {
         courseSectionRegistration2.setCourseSection(courseSection);
         courseSectionRegistration2.setScore(18.95D);
 
-        when(courseSectionRegistrationRepository.findAllByCourseSection_Term_IdAndStudent_User_UserName(termId,userName))
+        when(courseSectionRegistrationService.findByTermIdAndUserName(termId, userName))
                 .thenReturn(Arrays.asList(courseSectionRegistration1, courseSectionRegistration2));
 
-        when(termRepository.existsById(termId)).thenReturn(true);
+        doNothing().when(termService).checkExist(termId);
     }
 
     @Test
     void semesterGrades() {
-        ResponseEntity<?> responseEntity = studentController.semesterGrades(termId,authentication);
+        ResponseEntity<?> responseEntity = studentController.semesterGrades(termId, authentication);
         SemesterGradesOutputDTO semesterGradesOutputDTO = (SemesterGradesOutputDTO) responseEntity.getBody();
 
-        assertEquals(17.61,semesterGradesOutputDTO.getAverage());
+        assert semesterGradesOutputDTO != null;
+        assertEquals(17.61, semesterGradesOutputDTO.getAverage());
 
-        when(courseSectionRegistrationRepository.findAllByCourseSection_Term_IdAndStudent_User_UserName(termId,userName))
+        when(courseSectionRegistrationService.findByTermIdAndUserName(termId, userName))
                 .thenReturn(new ArrayList<>());
-        responseEntity = studentController.semesterGrades(termId,authentication);
+        responseEntity = studentController.semesterGrades(termId, authentication);
         semesterGradesOutputDTO = (SemesterGradesOutputDTO) responseEntity.getBody();
 
+        assert semesterGradesOutputDTO != null;
         assertEquals(0, semesterGradesOutputDTO.getAverage());
     }
 }

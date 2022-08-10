@@ -12,5 +12,7 @@ public class CourseNotFoundAdvice {
     @ResponseBody
     @ExceptionHandler(CourseNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    String CourseNotFoundHandler(CourseNotFoundException e){return e.getMessage();}
+    String CourseNotFoundHandler(CourseNotFoundException e) {
+        return e.getMessage();
+    }
 }

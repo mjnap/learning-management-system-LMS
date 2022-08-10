@@ -1,38 +1,28 @@
 package ir.sobhan.lms;
 
 import ir.sobhan.lms.security.Role;
-import ir.sobhan.lms.service.UserService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
-
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = LmsApplication.class)
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
 @TestPropertySource("/application-test.properties")
 @WebAppConfiguration
 public class IntegrationTest {
-
-    @MockBean
-    UserService userService;
 
     @Autowired
     WebApplicationContext webApplicationContext;
@@ -43,23 +33,25 @@ public class IntegrationTest {
     public void setup() {
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(this.webApplicationContext)
+                .apply(springSecurity())
                 .build();
     }
 
     @SneakyThrows
     @Test
-    public void test(){
+    public void test() {
         this.mockMvc.perform(post("/users").contentType(MediaType.APPLICATION_JSON)
                 .content("{" +
-                "  \"userName\": \"ali\"," +
-                "  \"password\": \"ali123\"," +
-                "  \"name\": \"Ali\"," +
-                "  \"phone\": \"09133573148\"," +
-                "  \"nationalId\": \"123456789\"" +
-                "}"))
+                        "  \"userName\": \"ali\"," +
+                        "  \"password\": \"ali123\"," +
+                        "  \"name\": \"Ali\"," +
+                        "  \"phone\": \"09133573148\"," +
+                        "  \"nationalId\": \"123456789\"" +
+                        "}"))
                 .andExpect(status().isCreated());
 
-        this.mockMvc.perform(post("/admin/new-instructor").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/instructors/new-instructor").contentType(MediaType.APPLICATION_JSON)
+                .with(user("javad").password("mjnap").roles(Role.ADMIN.name()))
                 .content("{" +
                         "  \"userName\": \"ali\"," +
                         "  \"rank\": \"FULL\"" +
@@ -71,12 +63,13 @@ public class IntegrationTest {
                         "  \"userName\": \"kia\"," +
                         "  \"password\": \"kia123\"," +
                         "  \"name\": \"Kia\"," +
-                        "  \"phone\": \"09217679934\"," +
+                        "  \"phone\": \"092176799456\"," +
                         "  \"nationalId\": \"125898965\"" +
                         "}"))
                 .andExpect(status().isCreated());
 
-        this.mockMvc.perform(post("/admin/new-student").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/students/new-student").contentType(MediaType.APPLICATION_JSON)
+                .with(user("javad").password("mjnap").roles(Role.ADMIN.name()))
                 .content("{" +
                         "  \"userName\": \"kia\"," +
                         "  \"studentId\": \"1234\"," +
@@ -84,53 +77,48 @@ public class IntegrationTest {
                         "}"))
                 .andExpect(status().isCreated());
 
-        //termId == 5
-        this.mockMvc.perform(post("/admin/new-term").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/terms/new-term").contentType(MediaType.APPLICATION_JSON)
+                .with(user("javad").password("mjnap").roles(Role.ADMIN.name()))
                 .content("{" +
                         "  \"title\": \"first semester\"," +
                         "  \"open\": true" +
                         "}"))
                 .andExpect(status().isCreated());
 
-        //courseId == 6
-        this.mockMvc.perform(post("/admin/new-course").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/courses/new-course").contentType(MediaType.APPLICATION_JSON)
+                .with(user("javad").password("mjnap").roles(Role.ADMIN.name()))
                 .content("{" +
                         "  \"title\": \"math\"," +
                         "  \"units\": 5" +
                         "}"))
                 .andExpect(status().isCreated());
 
-        this.mockMvc = MockMvcBuilders
-                .webAppContextSetup(this.webApplicationContext)
-                .apply(springSecurity())
-                .build();
-        //courseSectionId == 7
-        this.mockMvc.perform(post("/instructors/new-course-section").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(post("/course-sections/create").contentType(MediaType.APPLICATION_JSON)
                 .with(user("ali").password("ali123").roles(Role.INSTRUCTOR.name()))
                 .content("{" +
                         "  \"courseTitle\": \"math\"," +
-                        "  \"termId\": 5" +
+                        "  \"termId\": 6" +
                         "}"))
                 .andExpect(status().isCreated());
 
-        this.mockMvc.perform(post("/students/register-course").param("courseSectionId","7")
+        this.mockMvc.perform(post("/course-section-registrations/register-course").param("courseSectionId", "8")
                 .with(user("kia").password("kia123").roles(Role.STUDENT.name())))
                 .andExpect(status().isCreated());
 
-        this.mockMvc.perform(put("/instructors/grading").contentType(MediaType.APPLICATION_JSON)
+        this.mockMvc.perform(put("/course-section-registrations/grading").contentType(MediaType.APPLICATION_JSON)
                 .with(user("ali").password("ali123").roles(Role.INSTRUCTOR.name()))
                 .content("{" +
-                        "  \"courseSectionId\": 7," +
+                        "  \"courseSectionId\": 8," +
                         "  \"studentsScore\": [" +
                         "    {" +
-                        "      \"studentId\": 4," +
+                        "      \"studentId\": 5," +
                         "      \"score\": 18.5" +
                         "    }" +
                         "  ]" +
                         "}"))
                 .andExpect(status().isOk());
 
-        this.mockMvc.perform(get("/students/semester-grades/{termId}" , 5)
+        this.mockMvc.perform(get("/students/semester-grades/{termId}", 6)
                 .with(user("kia").password("kia123").roles(Role.STUDENT.name())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.average").value(18.5));

@@ -1,7 +1,7 @@
 package ir.sobhan.lms.model.dto.inputdto;
 
-import ir.sobhan.lms.model.entity.Course;
 import ir.sobhan.lms.model.dto.MapperInput;
+import ir.sobhan.lms.model.entity.Course;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +13,6 @@ public class CourseInputDTO implements MapperInput<Course> {
 
     @Override
     public Course toEntity() {
-        return new Course(title,units);
+        return new Course(title, units);
     }
 }

@@ -5,9 +5,9 @@ import javax.persistence.Enumerated;
 
 public enum Degree {
     @Enumerated(value = EnumType.STRING)
-    BS ,
+    BS,
     @Enumerated(value = EnumType.STRING)
-    MS ,
+    MS,
     @Enumerated(value = EnumType.STRING)
     PHD
 }
