@@ -19,7 +19,6 @@ public class CourseSectionRegistrationService {
     private final StudentRepository studentRepository;
 
     public void addScore(Long courseSectionId, StudentInfoDTO studentInfoDTO) {
-
         CourseSectionRegistration updateCourseSectionRegistration = courseSectionRegistrationRepository
                 .findByCourseSection_IdAndStudent_Id(courseSectionId, studentInfoDTO.getStudentId());
 

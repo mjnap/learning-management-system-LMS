@@ -36,7 +36,6 @@ public class CourseSectionController {
                                             @RequestParam @Nullable String courseTitle,
                                             @RequestParam int size,
                                             @RequestParam int page) {
-
         return courseSectionService.getAll(termId, instructorName, courseTitle, size, page);
     }
 
@@ -48,7 +47,6 @@ public class CourseSectionController {
     @PostMapping("/create")
     public ResponseEntity<?> newCourseSection(@RequestBody CourseSectionInputDTO courseSectionInputDTO,
                                               Authentication authentication) {
-
         Instructor instructor = securityService.getInstructor(authentication);
         Course course = courseService.getOne(courseSectionInputDTO.getCourseTitle());
         Term term = termService.getOne(courseSectionInputDTO.getTermId());
@@ -69,7 +67,6 @@ public class CourseSectionController {
     public ResponseEntity<?> updateCourseSection(@PathVariable Long id,
                                                  @RequestBody CourseSectionInputDTO courseSectionInputDTO,
                                                  Authentication authentication) {
-
         CourseSection courseSection = courseSectionService.getOne(id);
 
         if (securityService.isInstructorOrAdmin(courseSection, authentication)) {
@@ -87,7 +84,6 @@ public class CourseSectionController {
     @Transactional
     public ResponseEntity<?> deleteCourseSection(@PathVariable Long courseSectionId,
                                                  Authentication authentication) {
-
         CourseSection courseSection = courseSectionService.getOne(courseSectionId);
 
         if (!securityService.isInstructorOrAdmin(courseSection, authentication))
@@ -109,7 +105,6 @@ public class CourseSectionController {
     @GetMapping("/get-students/{courseSectionId}")
     public ResponseEntity<?> getStudentsOfCourseSection(@PathVariable Long courseSectionId,
                                                         Authentication authentication) {
-
         CourseSection courseSection = courseSectionService.getOne(courseSectionId);
 
         if (!securityService.isInstructorOrAdmin(courseSection, authentication))

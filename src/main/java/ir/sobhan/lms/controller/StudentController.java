@@ -44,7 +44,6 @@ public class StudentController {
 
     @PostMapping("/new-student")
     public ResponseEntity<?> newStudent(@RequestBody StudentInputDTO studentInputDTO) {
-
         User user = userService.getByUserName(studentInputDTO.getUserName());
         userService.addRoleToUser(user, Role.STUDENT);
 

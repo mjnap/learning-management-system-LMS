@@ -24,7 +24,6 @@ public class CourseSectionRegistrationController {
 
     @PostMapping("/register-course")
     public ResponseEntity<?> registerCourse(@RequestParam Long courseSectionId, Authentication authentication) {
-
         CourseSection courseSection = courseSectionService.getOne(courseSectionId);
         Student student = securityService.getStudent(authentication);
 
@@ -38,7 +37,6 @@ public class CourseSectionRegistrationController {
     @PutMapping("/grading")
     public ResponseEntity<?> grading(@RequestBody GradingInputDTO gradingInputDTO,
                                      Authentication authentication) {
-
         CourseSection courseSection = courseSectionService.getOne(gradingInputDTO.getCourseSectionId());
 
         if (!securityService.isInstructorOrAdmin(courseSection, authentication))

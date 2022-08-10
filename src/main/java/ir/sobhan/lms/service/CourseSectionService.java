@@ -26,7 +26,6 @@ public class CourseSectionService {
                                         String instructorName,
                                         String courseTitle,
                                         Pageable pageable) {
-
         if (instructorName != null && courseTitle != null)
             return courseSectionRepository.findAllByTerm_IdAndInstructor_User_NameAndCourse_Title(termId, instructorName, courseTitle, pageable);
         else if (instructorName != null)

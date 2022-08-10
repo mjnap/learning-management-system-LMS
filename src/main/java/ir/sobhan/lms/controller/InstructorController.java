@@ -38,7 +38,6 @@ public class InstructorController {
 
     @PostMapping("/new-instructor")
     public ResponseEntity<?> newInstructor(@RequestBody InstructorInputDTO instructorInputDTO) {
-
         User user = userService.getByUserName(instructorInputDTO.getUserName());
         userService.addRoleToUser(user, Role.INSTRUCTOR);
 
