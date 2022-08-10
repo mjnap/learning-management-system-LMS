@@ -39,7 +39,7 @@ public class InstructorController {
     @PostMapping("/new-instructor")
     public ResponseEntity<?> newInstructor(@RequestBody InstructorInputDTO instructorInputDTO) {
 
-        User user = userService.getOne(instructorInputDTO.getUserName());
+        User user = userService.getByUserName(instructorInputDTO.getUserName());
         userService.addRoleToUser(user, Role.INSTRUCTOR);
 
         Instructor instructor = new Instructor(user, Rank.valueOf(instructorInputDTO.getRank().toUpperCase()));

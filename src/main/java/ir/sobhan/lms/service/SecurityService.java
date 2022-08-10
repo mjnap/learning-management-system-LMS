@@ -30,9 +30,8 @@ public class SecurityService {
     }
 
     public boolean isInstructorOrAdmin(CourseSection courseSection, Authentication authentication) {
-        if (courseSection.getInstructor().getUser().getUserName().equals(authentication.getName()) ||
-                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")))
-            return true;
-        return false;
+        return (courseSection.getInstructor().getUser().getUserName().equals(authentication.getName())
+                ||
+                authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
     }
 }

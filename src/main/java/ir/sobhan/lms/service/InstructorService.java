@@ -52,8 +52,7 @@ public class InstructorService {
 
     public void delete(String userName) {
         instructorRepository.deleteByUser_UserName(userName);
-
-        User user = userService.getOne(userName);
+        User user = userService.getByUserName(userName);
         userService.removeRoleFromUser(user, Role.INSTRUCTOR);
         userService.save(user);
     }

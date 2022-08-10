@@ -13,4 +13,6 @@ public class ListSemesterOutputDTO {
     private int units;
     private String instructorName;
     private Double score;
+
+
 }

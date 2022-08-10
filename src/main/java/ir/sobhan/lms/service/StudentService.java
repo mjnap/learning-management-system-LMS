@@ -55,8 +55,7 @@ public class StudentService {
 
     public void delete(String userName) {
         studentRepository.deleteByUser_UserName(userName);
-
-        User user = userService.getOne(userName);
+        User user = userService.getByUserName(userName);
         userService.removeRoleFromUser(user, Role.STUDENT);
         userService.save(user);
     }
@@ -76,7 +75,6 @@ public class StudentService {
     }
 
     public Double average(List<CourseSectionRegistration> courseList) {
-
         String avg = String.format("%.2f", courseList.stream()
                 .map(CourseSectionRegistration::getScore)
                 .reduce(Double::sum)

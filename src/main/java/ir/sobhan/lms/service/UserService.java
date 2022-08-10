@@ -9,12 +9,12 @@ import ir.sobhan.lms.model.entity.User;
 import ir.sobhan.lms.security.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,8 +27,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-    @Bean
-    CommandLineRunner addAdmin() {
+    @PostConstruct
+    void addAdmin() {
         User user = new User(
                 adminConfig.getUserName(),
                 passwordEncoder.encode(adminConfig.getPassword()),
@@ -40,9 +40,9 @@ public class UserService {
         user.setRoles(Role.ADMIN.name());
 
         if (!userRepository.existsByUserName(user.getUserName()))
-            return args -> log.debug("Define an admin " + userRepository.save(user));
-
-        return args -> log.debug("Admin active");
+            log.info("Define an admin " + userRepository.save(user));
+        else
+            log.info("Admin active");
     }
 
     public List<UserOutputDTO> getAll(Pageable pageable) {
@@ -51,12 +51,12 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    public User getOne(String userName) {
+    public User getByUserName(String userName) {
         return userRepository.findByUserName(userName)
                 .orElseThrow(() -> new UserNotFoundException(userName));
     }
 
-    public User getOne(Long id) {
+    public User getById(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
@@ -72,12 +72,10 @@ public class UserService {
 
     public void removeRoleFromUser(User user, Role roleGoal) {
         String[] roles = user.getRoles().split(" ");
-        StringBuilder newRoles = new StringBuilder();
-        for (String role : roles)
-            if (!role.equals(roleGoal.name()))
-                newRoles.append(role).append(" ");
-
-        user.setRoles(newRoles.toString());
+        String newRoles = Arrays.stream(roles)
+                .filter(role -> !role.equals(roleGoal.name()))
+                .collect(Collectors.joining(" "));
+        user.setRoles(newRoles);
     }
 
     public boolean existUserName(String userName) {

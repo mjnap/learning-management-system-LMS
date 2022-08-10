@@ -14,8 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,36 +46,35 @@ public class TermService {
     }
 
     public List<ListSemesterOutputDTO> createListInfo(List<CourseSectionRegistration> courseList) {
-        List<ListSemesterOutputDTO> sectionOutputDTOList = new ArrayList<>();
-        courseList.forEach(course -> {
-            sectionOutputDTOList.add(ListSemesterOutputDTO.builder()
-                    .CourseSectionId(course.getCourseSection().getId())
-                    .course(course.getCourseSection().getCourse().getTitle())
-                    .units(course.getCourseSection().getCourse().getUnits())
-                    .instructorName(course.getCourseSection().getInstructor().getUser().getName())
-                    .score(course.getScore())
-                    .build());
-        });
-
-        return sectionOutputDTOList;
+        return courseList.stream()
+                .map(course ->
+                     ListSemesterOutputDTO.builder()
+                            .CourseSectionId(course.getCourseSection().getId())
+                            .course(course.getCourseSection().getCourse().getTitle())
+                            .units(course.getCourseSection().getCourse().getUnits())
+                            .instructorName(course.getCourseSection().getInstructor().getUser().getName())
+                            .score(course.getScore())
+                            .build()
+                )
+                .collect(Collectors.toList());
     }
 
     public List<TermOutputSummaryDTO> createTermList(List<Term> termList, Authentication authentication) {
-        List<TermOutputSummaryDTO> termOutputSummaryDTOList = new ArrayList<>();
+        return termList.stream()
+                .map(term -> {
+                    List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
+                            .findAllByCourseSection_Term_IdAndStudent_User_UserName(term.getId(), authentication.getName());
 
-        termList.forEach(term -> {
-            List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
-                    .findAllByCourseSection_Term_IdAndStudent_User_UserName(term.getId(), authentication.getName());
-
-            if (!courseList.isEmpty())
-                termOutputSummaryDTOList.add(TermOutputSummaryDTO.builder()
-                        .termId(term.getId())
-                        .termTile(term.getTitle())
-                        .termAverage(average(courseList))
-                        .build());
-        });
-
-        return termOutputSummaryDTOList;
+                    if (!courseList.isEmpty())
+                        return TermOutputSummaryDTO.builder()
+                                .termId(term.getId())
+                                .termTile(term.getTitle())
+                                .termAverage(average(courseList))
+                                .build();
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public Term save(Term term) {
@@ -98,7 +97,6 @@ public class TermService {
     }
 
     public Double average(List<CourseSectionRegistration> courseList) {
-
         String avg = String.format("%.2f", courseList.stream()
                 .map(CourseSectionRegistration::getScore)
                 .reduce(Double::sum)
