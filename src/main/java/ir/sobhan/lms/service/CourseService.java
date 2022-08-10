@@ -26,10 +26,10 @@ public class CourseService {
 
     public Course getOne(Long id) {
         return courseRepository.findById(id)
-                    .orElseThrow(() -> new CourseNotFoundException(id));
+                .orElseThrow(() -> new CourseNotFoundException(id));
     }
 
-    public Course getOne(String title){
+    public Course getOne(String title) {
         return courseRepository.findByTitle(title)
                 .orElseThrow(() -> new CourseNotFoundException(title));
     }
@@ -38,7 +38,7 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    public void delete(Long id){
+    public void delete(Long id) {
         courseRepository.deleteById(id);
     }
 

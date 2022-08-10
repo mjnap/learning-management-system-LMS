@@ -23,9 +23,9 @@ public class CourseSectionService {
     private final TermService termService;
 
     private List<CourseSection> findAll(Long termId,
-                                       String instructorName,
-                                       String courseTitle,
-                                       Pageable pageable) {
+                                        String instructorName,
+                                        String courseTitle,
+                                        Pageable pageable) {
 
         if (instructorName != null && courseTitle != null)
             return courseSectionRepository.findAllByTerm_IdAndInstructor_User_NameAndCourse_Title(termId, instructorName, courseTitle, pageable);
@@ -57,12 +57,12 @@ public class CourseSectionService {
         return courseSectionRepository.save(courseSection);
     }
 
-    public void update(CourseSection courseSection, CourseSectionInputDTO courseSectionInputDTO){
-         courseSection.setCourse(courseService.getOne(courseSectionInputDTO.getCourseTitle()));
-         courseSection.setTerm(termService.getOne(courseSectionInputDTO.getTermId()));
+    public void update(CourseSection courseSection, CourseSectionInputDTO courseSectionInputDTO) {
+        courseSection.setCourse(courseService.getOne(courseSectionInputDTO.getCourseTitle()));
+        courseSection.setTerm(termService.getOne(courseSectionInputDTO.getTermId()));
     }
 
-    public void delete(Long courseSectionId){
+    public void delete(Long courseSectionId) {
         courseService.delete(courseSectionId);
     }
 

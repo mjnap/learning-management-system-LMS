@@ -26,21 +26,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf()
-                    .disable()
+                .disable()
                 .authorizeRequests()
-                    .antMatchers("/course-sections/update/**", "/course-sections/delete/**",
-                            "/course-sections/get-students/**").hasAnyRole(Role.INSTRUCTOR.name(), Role.ADMIN.name())
-                    .antMatchers("/course-section-registrations/register-course", "/students/semester-grades/**",
-                            "/students/summary").hasRole(Role.STUDENT.name())
-                    .antMatchers("/course-sections/create", "/course-section-registrations/grading").hasRole(Role.INSTRUCTOR.name())
-                    .antMatchers("/courses/new-course", "/courses/update-course/**", "/courses/delete-course/**",
-                            "/instructors/new-instructor", "/instructors/update-instructor/**", "/instructors/delete-instructor/**",
-                            "/students/new-student", "/students/update-student/**", "/students/delete-student/**",
-                            "/terms/new-term", "/terms/update-term/**", "/terms/delete-term/**").hasRole(Role.ADMIN.name())
-                    .antMatchers(HttpMethod.POST, "/users").anonymous()
+                .antMatchers("/course-sections/update/**", "/course-sections/delete/**",
+                        "/course-sections/get-students/**").hasAnyRole(Role.INSTRUCTOR.name(), Role.ADMIN.name())
+                .antMatchers("/course-section-registrations/register-course", "/students/semester-grades/**",
+                        "/students/summary").hasRole(Role.STUDENT.name())
+                .antMatchers("/course-sections/create", "/course-section-registrations/grading").hasRole(Role.INSTRUCTOR.name())
+                .antMatchers("/courses/new-course", "/courses/update-course/**", "/courses/delete-course/**",
+                        "/instructors/new-instructor", "/instructors/update-instructor/**", "/instructors/delete-instructor/**",
+                        "/students/new-student", "/students/update-student/**", "/students/delete-student/**",
+                        "/terms/new-term", "/terms/update-term/**", "/terms/delete-term/**").hasRole(Role.ADMIN.name())
+                .antMatchers(HttpMethod.POST, "/users").anonymous()
                 .anyRequest()
-                    .authenticated()
+                .authenticated()
                 .and()
-                    .formLogin();
+                .formLogin();
     }
 }

@@ -67,7 +67,7 @@ public class TermService {
             List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
                     .findAllByCourseSection_Term_IdAndStudent_User_UserName(term.getId(), authentication.getName());
 
-            if(!courseList.isEmpty())
+            if (!courseList.isEmpty())
                 termOutputSummaryDTOList.add(TermOutputSummaryDTO.builder()
                         .termId(term.getId())
                         .termTile(term.getTitle())
@@ -93,7 +93,7 @@ public class TermService {
                 .toDTO();
     }
 
-    public void delete(Long id){
+    public void delete(Long id) {
         termRepository.deleteById(id);
     }
 

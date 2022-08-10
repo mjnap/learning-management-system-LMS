@@ -28,16 +28,16 @@ public class CourseSectionRegistrationService {
         courseSectionRegistrationRepository.save(updateCourseSectionRegistration);
     }
 
-    public void save(CourseSectionRegistration courseSectionRegistration){
+    public void save(CourseSectionRegistration courseSectionRegistration) {
         courseSectionRegistrationRepository.save(courseSectionRegistration);
     }
 
-    public List<CourseSectionRegistration> findByTermIdAndUserName(Long termId, String userName){
+    public List<CourseSectionRegistration> findByTermIdAndUserName(Long termId, String userName) {
         return courseSectionRegistrationRepository
                 .findAllByCourseSection_Term_IdAndStudent_User_UserName(termId, userName);
     }
 
-    public Double totalAvg(Authentication authentication){
+    public Double totalAvg(Authentication authentication) {
         return courseSectionRegistrationRepository.totalAverage(studentRepository
                 .findByUser_UserName(authentication.getName())
                 .orElseThrow(() -> new StudentNotFoundException(authentication.getName()))
