@@ -9,6 +9,6 @@ import lombok.Setter;
 @Getter
 public class TermOutputSummaryDTO {
     private Long termId;
-    private String termTile;
+    private String termTitle;
     private Double termAverage;
 }

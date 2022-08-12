@@ -8,6 +8,7 @@ import ir.sobhan.lms.service.CourseSectionRegistrationService;
 import ir.sobhan.lms.service.CourseSectionService;
 import ir.sobhan.lms.service.SecurityService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/course-section-registrations")
 @RequiredArgsConstructor
+@Slf4j
 public class CourseSectionRegistrationController {
 
     private final CourseSectionService courseSectionService;
@@ -28,6 +30,7 @@ public class CourseSectionRegistrationController {
         Student student = securityService.getStudent(authentication);
 
         courseSectionRegistrationService.save(new CourseSectionRegistration(courseSection, student));
+        log.info("Course section registration added");
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

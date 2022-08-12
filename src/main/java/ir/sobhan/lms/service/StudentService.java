@@ -67,10 +67,10 @@ public class StudentService {
                 .build();
     }
 
-    public SummaryOutputDTO showSummery(List<Term> termList, Authentication authentication) {
+    public SummaryOutputDTO showSummery(Authentication authentication) {
         return SummaryOutputDTO.builder()
                 .totalAverage(courseSectionRegistrationService.totalAvg(authentication))
-                .termList(termService.createTermList(termList, authentication))
+                .termList(termService.createTermList(authentication))
                 .build();
     }
 

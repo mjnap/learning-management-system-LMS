@@ -4,6 +4,7 @@ import ir.sobhan.lms.model.dto.inputdto.TermInputDTO;
 import ir.sobhan.lms.model.dto.outputdto.TermOutputDTO;
 import ir.sobhan.lms.service.TermService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/terms")
 @RequiredArgsConstructor
+@Slf4j
 public class TermController {
 
     private final TermService termService;
@@ -31,6 +33,7 @@ public class TermController {
 
     @PostMapping("/new-term")
     public ResponseEntity<?> newTerm(@RequestBody TermInputDTO termInputDTO) {
+        log.info("Term added : " + termInputDTO.getTitle());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(termService.save(termInputDTO.toEntity()));
@@ -47,6 +50,8 @@ public class TermController {
     @Transactional
     public ResponseEntity<?> deleteTerm(@PathVariable Long id) {
         termService.delete(id);
+        log.info("Term deleted : " + id);
+
         return ResponseEntity
                 .noContent()
                 .build();

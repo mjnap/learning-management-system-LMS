@@ -10,6 +10,7 @@ import ir.sobhan.lms.security.Role;
 import ir.sobhan.lms.service.InstructorService;
 import ir.sobhan.lms.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/instructors")
 @RequiredArgsConstructor
+@Slf4j
 public class InstructorController {
 
     private final InstructorService instructorService;
@@ -42,6 +44,7 @@ public class InstructorController {
         userService.addRoleToUser(user, Role.INSTRUCTOR);
 
         Instructor instructor = new Instructor(user, Rank.valueOf(instructorInputDTO.getRank().toUpperCase()));
+        log.info("Instructor added : " + instructor.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -59,6 +62,8 @@ public class InstructorController {
     @Transactional
     public ResponseEntity<?> deleteInstructor(@PathVariable String userName) {
         instructorService.delete(userName);
+        log.info("Instructor deleted : " + userName);
+
         return ResponseEntity
                 .noContent()
                 .build();

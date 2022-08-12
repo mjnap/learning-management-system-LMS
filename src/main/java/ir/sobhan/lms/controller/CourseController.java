@@ -4,6 +4,7 @@ import ir.sobhan.lms.model.dto.inputdto.CourseInputDTO;
 import ir.sobhan.lms.model.dto.outputdto.CourseOutputDTO;
 import ir.sobhan.lms.service.CourseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/courses")
 @RequiredArgsConstructor
+@Slf4j
 public class CourseController {
 
     private final CourseService courseService;
@@ -31,6 +33,7 @@ public class CourseController {
 
     @PostMapping("/new-course")
     public ResponseEntity<?> newCourse(@RequestBody CourseInputDTO courseInputDTO) {
+        log.info("Course added : " + courseInputDTO.toEntity());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(courseService.save(courseInputDTO.toEntity()));
@@ -47,6 +50,7 @@ public class CourseController {
     @Transactional
     public ResponseEntity<?> deleteCourse(@PathVariable Long id) {
         courseService.delete(id);
+        log.info("course deleted : " + id);
         return ResponseEntity
                 .noContent()
                 .build();

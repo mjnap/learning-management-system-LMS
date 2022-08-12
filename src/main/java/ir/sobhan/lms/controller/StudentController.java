@@ -12,6 +12,7 @@ import ir.sobhan.lms.service.StudentService;
 import ir.sobhan.lms.service.TermService;
 import ir.sobhan.lms.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/students")
+@Slf4j
 public class StudentController {
 
     private final StudentService studentService;
@@ -51,6 +53,7 @@ public class StudentController {
                 studentInputDTO.getStudentId(),
                 Degree.valueOf(studentInputDTO.getDegree().toUpperCase()),
                 new Date());
+        log.info("Student added : " + student.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -68,6 +71,8 @@ public class StudentController {
     @Transactional
     public ResponseEntity<?> deleteStudent(@PathVariable String userName) {
         studentService.delete(userName);
+        log.info("Student deleted : " + userName);
+
         return ResponseEntity
                 .noContent()
                 .build();
@@ -85,6 +90,6 @@ public class StudentController {
     @GetMapping("/summary")
     public ResponseEntity<?> summary(Authentication authentication) {
         return ResponseEntity
-                .ok(studentService.showSummery(termService.getAll(), authentication));
+                .ok(studentService.showSummery(authentication));
     }
 }

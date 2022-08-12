@@ -14,8 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,10 +25,6 @@ public class TermService {
 
     private final TermRepository termRepository;
     private final CourseSectionRegistrationRepository courseSectionRegistrationRepository;
-
-    public List<Term> getAll() {
-        return termRepository.findAll();
-    }
 
     public List<TermOutputDTO> getAll(Pageable pageable) {
         return termRepository.findAll(pageable).stream()
@@ -59,21 +56,28 @@ public class TermService {
                 .collect(Collectors.toList());
     }
 
-    public List<TermOutputSummaryDTO> createTermList(List<Term> termList, Authentication authentication) {
-        return termList.stream()
-                .map(term -> {
-                    List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
-                            .findAllByCourseSection_Term_IdAndStudent_User_UserName(term.getId(), authentication.getName());
+    public List<TermOutputSummaryDTO> createTermList(Authentication authentication) {
+        List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
+                .findAllByStudent_User_UserName(authentication.getName());
 
-                    if (!courseList.isEmpty())
-                        return TermOutputSummaryDTO.builder()
-                                .termId(term.getId())
-                                .termTile(term.getTitle())
-                                .termAverage(average(courseList))
-                                .build();
-                    return null;
-                })
-                .filter(Objects::nonNull)
+        Set<Long> termIdSet = new HashSet<>();
+
+        courseList.forEach(courseSectionRegistration ->
+            termIdSet.add(courseSectionRegistration.getCourseSection().getTerm().getId())
+        );
+
+        return termIdSet.stream()
+                .map(termId ->
+                    TermOutputSummaryDTO.builder()
+                            .termId(termId)
+                            .termTitle(termRepository.findById(termId)
+                                    .orElseThrow(() -> new TermNotFoundException(termId))
+                                    .getTitle())
+                            .termAverage(average(courseList.stream()
+                                    .filter(course -> course.getCourseSection().getTerm().getId().equals(termId))
+                                    .collect(Collectors.toList())))
+                            .build()
+                )
                 .collect(Collectors.toList());
     }
 

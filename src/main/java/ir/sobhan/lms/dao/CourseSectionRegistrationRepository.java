@@ -11,6 +11,8 @@ import java.util.List;
 public interface CourseSectionRegistrationRepository extends JpaRepository<CourseSectionRegistration, Long> {
     CourseSectionRegistration findByCourseSection_IdAndStudent_Id(Long courseSectionId, Long studentId);
 
+    List<CourseSectionRegistration> findAllByStudent_User_UserName(String userName);
+
     List<CourseSectionRegistration> findAllByCourseSection_Term_IdAndStudent_User_UserName(Long termId, String userName);
 
     @Query(nativeQuery = true, value = "SELECT AVG(score) FROM course_section_registration WHERE student_id=?")

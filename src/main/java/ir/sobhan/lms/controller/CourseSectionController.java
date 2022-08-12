@@ -11,6 +11,7 @@ import ir.sobhan.lms.service.CourseService;
 import ir.sobhan.lms.service.SecurityService;
 import ir.sobhan.lms.service.TermService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/course-sections")
+@Slf4j
 public class CourseSectionController {
 
     private final CourseSectionService courseSectionService;
@@ -57,6 +59,7 @@ public class CourseSectionController {
                     .body("The term is not open");
 
         CourseSection newCourseSection = new CourseSection(instructor, course, term);
+        log.info("Course section added : " + newCourseSection.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -97,6 +100,8 @@ public class CourseSectionController {
                     .body("You can not delete this course section");
 
         courseSectionService.delete(courseSectionId);
+        log.info("Course section deleted : " + courseSectionId);
+
         return ResponseEntity
                 .noContent()
                 .build();
