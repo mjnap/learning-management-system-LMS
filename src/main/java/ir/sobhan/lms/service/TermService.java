@@ -60,24 +60,19 @@ public class TermService {
         List<CourseSectionRegistration> courseList = courseSectionRegistrationRepository
                 .findAllByStudent_User_UserName(authentication.getName());
 
-        Set<Long> termIdSet = new HashSet<>();
-
-        courseList.forEach(courseSectionRegistration ->
-            termIdSet.add(courseSectionRegistration.getCourseSection().getTerm().getId())
-        );
-
-        return termIdSet.stream()
-                .map(termId ->
-                    TermOutputSummaryDTO.builder()
-                            .termId(termId)
-                            .termTitle(termRepository.findById(termId)
-                                    .orElseThrow(() -> new TermNotFoundException(termId))
-                                    .getTitle())
-                            .termAverage(average(courseList.stream()
-                                    .filter(course -> course.getCourseSection().getTerm().getId().equals(termId))
-                                    .collect(Collectors.toList())))
-                            .build()
-                )
+        return courseList.stream()
+                .map(courseSectionRegistration -> courseSectionRegistration.getCourseSection().getTerm().getId())
+                .collect(Collectors.toSet())
+                .stream()
+                .map(termId -> TermOutputSummaryDTO.builder()
+                        .termId(termId)
+                        .termTitle(termRepository.findById(termId)
+                                .orElseThrow(() -> new TermNotFoundException(termId))
+                                .getTitle())
+                        .termAverage(average(courseList.stream()
+                                .filter(course -> course.getCourseSection().getTerm().getId().equals(termId))
+                                .collect(Collectors.toList())))
+                        .build())
                 .collect(Collectors.toList());
     }
 
