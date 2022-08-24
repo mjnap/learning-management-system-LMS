@@ -60,8 +60,7 @@ public class TermService {
 
         return courseList.stream()
                 .map(courseSectionRegistration -> courseSectionRegistration.getCourseSection().getTerm().getId())
-                .collect(Collectors.toSet())
-                .stream()
+                .distinct()
                 .map(termId -> TermOutputSummaryDTO.builder()
                         .termId(termId)
                         .termTitle(termRepository.findById(termId)
